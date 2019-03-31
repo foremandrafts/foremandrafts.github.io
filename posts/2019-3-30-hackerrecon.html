@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Communicating to the audience.">
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/pygments.css">
+	<link rel="stylesheet" href="/css/styles.css">
+	<title>Initial Reconaissance for Bug-Bounty</title>
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+<header class="bgimage">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-6">
+				<a href="https://foremandrafts.github.io/"><h1>Drafting my Thoughts</h1></a>
+			</div>
+			<div class="col-xs-6">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="https://www.github.com/foremandrafts">Github</a></li>
+					<li><a href="https://foremandrafts.github.io/archives.html">Archives</a></li>
+					<li><a href="https://foremandrafts.github.io/about.html">About</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-1">
+			</div>
+			<div class="col-xs-8">
+				<h4>Future is looking bright.. <span class="glyphicon glyphicon-sunglasses"></span></h4>
+			</div>
+		</div>
+	</div>
+</header>
+</nav>
+
+<div class="content container-fluid">
+
+    <h2>Domain-Name Collection</h2>
+<h5>March 30, 2019</h5>
+<p class="lead">Reading cyber-security articles, and specifically the investigative aspects of vulnerability testing, one begins to get a sense for the steps that would be needed to perform this task. When a company puts their primary website (and all subdomains) into scope for a <u>bug-bounty</u>, the logical first question is just exactly how would you enumerate all the company properties under that primary website? This seems so obvious, but it is a crucial first step, and for a long time security analysts were using very crude, brute-force types of tools that were running dictionary-type scans using large lists of words.</p>
+
+<p>It's only been the last 2-3 years (to my knowledge) that tools began to appear which used alternate approaches, such as historical DNS lookups, domain-names on security certificates, other archived data sources, as well as actually spidering a site to collect domain-names from URLs. Some of the latest tools are using dozens of external sources to gather a comprehensive list. While this is probably the most thorough approach, it often leads to <u>massive lists of unused domain-names</u>, some of which date back decades.</p>
+
+<p>In all honesty I have not tried any of the older dictionary-scanning tools, with recognizable names such as <b>SubBrute</b> and <b>Sublist3r</b>. About a year ago I read many people talking about a tool called <b>Aquatone</b>. I tried the tool, and indeed it did an admirable job of producing a large list of domain-names. Shortly after I tried it, the author announced <a href="https://twitter.com/michenriksen/status/1010859541960056832" target="_blank">he may discontinue development of this functionality</a>, and he recommended another tool called <b>Amass</b> which he said did an even better job at this particular task. The OWASP <b>Amass</b> project's stated goal is to fill in gaps and data-sources that other tools had missed. Recently I was testing several enumeration tools, and after seeing the list produced by Amass I basically stopped looking at the other tools.</p>
+
+<h3>OWASP Amass</h3>
+<p>I think people were turned off initially by <b>Amass</b> because it uses the Go interpreter, a relative new-comer in the Linux world, and many people get tired of learning yet another language and system which works essentially the same as existing ones. Go is new for sure, but after installing it I found it really is not difficult to use. Actually <b>Amass</b> offers several options, including Snap, Docker images, and pre-compiled binaries. Since I tend to be a purist I went with the compile-from-source option, which involved installing the <a href="https://golang.org/doc/install" target="_blank">Go library</a> first, and then installing <b>Amass</b>. The instructions are on <a href="https://github.com/OWASP/Amass" target="_blank">the Amass github repo</a>. The most important part seemed to be getting the path set correctly. I added the following to the end of my <u>.bashrc file</u> so things work on every reboot: </p>
+
+<pre>export GOROOT=/root/go
+export GOPATH=/usr/local/go/bin:/root/go/bin
+export PATH=$PATH:$GOPATH</pre>
+
+<p>I've seen some odd bug-bounty programs where this kind of search is not called for, and a few where the company simply doesn't want more than one or two specific domains to be probed, but the large majority of companies out there want most or all of their assets to be reviewed for vulnerability. After installing <u>Go and Amass</u>, and ensuring that <b>Amass</b> runs, the next step is looking at configuration settings. With <b>Amass</b> you can skip all the command-line arguments and simply put them into a single amass_config.ini file. It's even easier, since they provide you an example config file, and you can often just uncomment a few lines. Here is the <a href="https://github.com/OWASP/Amass/blob/master/doc/user_guide.md" target="_blank">primary Amass help page</a> with all the details. I have a single folder for all my bug-bounty ops, and I put the <u>amass_config.ini</u> file into the root of that folder. Here are some command configuration settings:</p>
+
+<pre># Basic settings related to brute forcing
+brute_forcing = true
+recursive_brute_forcing = true
+
+# Number of discoveries made in a subdomain before performing recursive brute forcing
+minimum_for_recursive = 1
+
+# Specify the path of the wordlist file that should be used during brute forcing
+wordlist_file = /root/go/src/github.com/OWASP/Amass/wordlists/subdomains.lst
+
+# Would you like to permute resolved names?
+alterations = true
+
+# Would you like to use more active techniques, such as pulling certificates from discovered IP addresses?
+mode = active
+
+# Ports used when pulling certificates
+port = 443
+
+# Would you like unresolved names to be included in the output?
+include_unresolvable = true
+
+# Root domain names used in the enumeration
+[domains]
+domain = sometargetcompany.net
+
+# DNS resolvers used globally by the amass package
+[resolvers]
+resolver = 1.1.1.1 ; Cloudflare
+resolver = 8.8.8.8 ; Google
+resolver = 77.88.8.8 ; Yandex.DNS
+resolver = 1.0.0.1 ; Cloudflare Secondary
+resolver = 8.8.4.4 ; Google Secondary
+resolver = 77.88.8.1 ; Yandex.DNS Secondary</pre>
+
+<p>Then just start Amass with a command like this</p>
+
+<pre>&gt; amass -config /Ops/amass_config.ini | tee ./amass_subdomainsearch.txt</pre>
+
+<p>I initially included unresolvable domain-names in the search (since I'm an airhead and I like wasting time). The truth is you don't need those as an external tester. If you can't get an IP address, then you have no use for the domain-name.</p>
+
+<p>Another consideration is that some of these small to medium companies can return millions of domain-names, so it is recommended using a tool like <b>GKrelM</b> to ensure you still have network activity with some of the long-running scans. There are mysterious forces out there which will knock you offline if you demonstrate an intention to perform <u>comprehensive domain or port scans</u>. </p>
+
+<h3>NMAP and List Processing</h3>
+<p>If you do end up with a ton of inactive domain-names, you can filter them with a forward-DNS search using <b>NMAP</b> and then remove unresolvable lines with <b>BASH</b> as follows: </p>
+
+<pre>&gt; nmap -iL amass_subdomainsearch.txt -sL -sn -oN - --dns-servers 8.8.8.8,8.8.4.4 &gt; amass_activehosts_raw.txt
+&gt; sed -i '/Failed to resolve/d' amass_activehosts_raw.txt
+&gt; sed -i '/Other addresses/d' amass_activehosts_raw.txt</pre>
+
+<p>That's an <b>NMAP</b> host-discovery scan, with a simple list-scan option (DNS-resolve and simply list the target), then disable follow-on port scanning. Those are the <u>Google DNS-servers</u> listed, since they're fast and well connected on the network. Stealth is irrelevant here since we're not even touching the targets themselves, and <b>NMAP</b> offers options to view output and simultaneously send it to a file.</p>
+
+<p><b>Sed</b> is great for modifying files in-place. Those commands above will delete lines containing 'Failed to resolve' and 'Other addresses'. You may have to remove a couple meta-information lines from the start and end, but the rest will be resolvable domain-names, and you can get a clean list of these with the following commands: </p>
+
+<pre>&gt; awk '{print $5}' amass_activehosts_raw.txt &gt; amass_activehosts.txt
+&gt; rm amass_activehosts_raw.txt</pre>
+
+<p>One scan I performed recently on a <u>medium-sized business</u> started with 2 to 3 million (mostly unused) domain-names, and resulted in about 1300 active, resolvable domain-names. At this stage you have the option to scan all these resolvable domain-names (it can take a long time to get through 65,535 ports on 1300 domain-names). What I did was simply <u>focus on browser-based services</u>, such as those used on port 443, since the large majority of company business and useful activity will be web-based. I did an <b>NMAP</b> scan on these with slightly more stealth, because some WAFs or firewalls may detect <b>NMAP</b> and drop or block your packets. In truth they can always detect what you're doing if they have modern defenses, but if the company is doing business on these ports/servers they won't block everything. Here is the scan I used: </p>
+
+<pre>&gt; nmap -iL ./amass_activehostips.txt -sT -f -p80,8080,443,8443,8181 -Pn --data-length 140 --host-timeout 30m --scan-delay 1500ms --initial-rtt-timeout 1100ms --max-retries 2 --script http-enum --script-args http.useragent="Hi There" target_ip</pre>
+
+<p>The above specifies IP fragmentation, non-standard values for --data-length, --host-timeout, --scan-delay, --initial-rtt-timeout, useragent header, and the TCP-connect scan which tends to be a little less identifiable than the Syn-scan. Also we're skipping host-discovery here, and if you use IP addresses then there won't be any DNS lookup. My system got through 1300 scans on 5 ports in about 50 minutes, and resulted in roughly 90 IP addresses which have interesting web-based activity going on. Once you've identified <u>host-IPs with open ports</u>, you can perform more detailed scans and really start using the NMAP databases. Here is an example: </p>
+
+<pre>&gt; nmap -O -v -sV -sC -p80,8080,443,8443,8181 -Pn --reason target_ip</pre>
+
+<p>This command runs all the 'default' NMAP scripts, along with providing its best guess for operating system, and service/version information. Any lines that say 'Filtered' should be discarded since the server isn't responding on that port. The resulting information should be enough to start poking at some of these endpoints with other tools, such as <u>spidering proxies and fuzzers</u>.</p>
+
+<h3>Last Words and Other Useful Stuff</h3>
+<p><b>NMAP</b> requires some time spent with it to become familiar with many of the features, so reviewing available documentation is recommended. Below I've listed a few NMAP webpages which I found useful.
+  <ul style="list-style-type: none;">
+    <li><a href="https://nmap.org/book/toc.html" target="_blank">Top-Level Online Documentation</a></li>
+    <li><a href="https://nmap.org/book/man-briefoptions.html" target="_blank">Command-Line Options Summary</a></li>
+    <li><a href="https://nmap.org/book/man-host-discovery.html" target="_blank">Host Discovery</a></li>
+    <li><a href="https://nmap.org/book/man-port-scanning-techniques.html" target="_blank">Port Scanning Techniques</a></li>
+  </ul>
+</p>
+
+<p>Many <b>BASH</b> tools require time spent as well, so aside from the brief explanations already provided, I won't go into much more detail on those. I recommend the reader explore each of those tools further on their own.</p>
+
+<p>I did run into a script (which I modified slightly) to perform forward-DNS lookups on a domain-name list, then output several useful items into a multi-column CSV file. The columns contain domain-name first, then an IP address (or the first IP found in case round-robin load-balancing is being used), followed by zero or more name-servers used by that domain. Some may find it helpful, so I've presented the script below.</p>
+
+<pre>#!/bin/bash
+# Input: A single file containing a list of domain-names, one per line
+# Output: A csv containing domain-name, IP address, and Nameservers in each column
+
+# Give each column the relevant header titles
+echo "Domain Name,IP Address,Nameserver,Nameserver,Nameserver,Nameserver,Nameserver" &gt; "${1%%.*}_exp.csv"
+
+while read domain
+do
+  # Get IP address defined in domain's root A-record (only grab the very last one returned)
+  ipaddress=`dig $domain +short | tail -n1`
+
+  # Get list of all nameservers
+  ns=`dig ns $domain +short| sort | tr '\n' ','`
+
+  echo "$domain"
+  echo "IP Address:  $ipaddress"
+  echo "Nameservers: $ns"
+  echo " "
+  
+  # Prints all the values fetched into the CSV file
+  echo -e "$domain,$ipaddress,$ns" &gt;&gt; "${1%%.*}_exp.csv"
+
+# Defines the text file from which to read domain names
+done &lt; $1</pre>
+
+<p>If I named the script <u>dnslu.sh</u> then it could be used in the following way, passing a file containing domain-names: </p>
+
+<pre>&gt; ~/Scripts/dnslu.sh amass_activehosts.txt</pre>
+
+<p>The output in this case would be a file named <u>amass_activehosts_exp.csv</u> . Now to get a list of unique IP addresses and copy them to another file, I could use a command like the following: </p>
+
+<pre>&gt; csvtool col 2 amass_activehosts_exp.csv &#x7c; uniq -u &gt; amass_activehostips.txt &amp;&amp; sed -i '1d' amass_activehostips.txt </pre>
+
+<p>The reason the above can come in handy is that <b>NMAP</b> scans often run much quicker when you separate <u>host-discovery</u> from <u>port scanning</u>, and also when or if you perform DNS lookups.</p>
+
+<div>&nbsp;</div>
+<p>-R. Foreman</p>
+<div>&nbsp;</div>
+
+
+
+	<div id="disqus_thread"></div>
+	<script>
+	    /**
+	     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+	     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+	     */
+	    /*
+	    var disqus_config = function () {
+	        this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+	        this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+	    };
+	    */
+	    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+	        var d = document, s = d.createElement('script');
+	        
+	        s.src = '//4draft.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+	        
+	        s.setAttribute('data-timestamp', +new Date());
+	        (d.head || d.body).appendChild(s);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+
+</div>
+
+<script src="/js/jquery-3.1.1.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/script.js"></script>
+
+<!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-91676417-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+
+</body>
+
+</html>
+
+

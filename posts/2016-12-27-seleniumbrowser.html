@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Communicating to the audience.">
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/pygments.css">
+	<link rel="stylesheet" href="/css/styles.css">
+	<title>Selenium for Browser Leverage</title>
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+<header class="bgimage">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-6">
+				<a href="https://foremandrafts.github.io/"><h1>Drafting my Thoughts</h1></a>
+			</div>
+			<div class="col-xs-6">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="https://www.github.com/foremandrafts">Github</a></li>
+					<li><a href="https://foremandrafts.github.io/archives.html">Archives</a></li>
+					<li><a href="https://foremandrafts.github.io/about.html">About</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-1">
+			</div>
+			<div class="col-xs-8">
+				<h4>Future is looking bright.. <span class="glyphicon glyphicon-sunglasses"></span></h4>
+			</div>
+		</div>
+	</div>
+</header>
+</nav>
+
+<div class="content container-fluid">
+
+    <h2>Selenium for Browser Leverage</h2>
+<p>Republished from a <a href="https://4draft.wordpress.com/2016/08/25/selenium-for-browser-leverage/" target="_blank">prior blogpost</a> in August of this year</p>
+<h5>December 27, 2016</h5>
+<p class="lead">The technical luxuries just do not stop rolling in. I was out recently researching Chrome extensions, with the intention of performing browser automation, when I ran into a framework called <a href="http://www.seleniumhq.org/docs/" target="_blank">Selenium</a> which makes this kind of task <u>vastly</u> easier to code. Chrome extensions do involve a fair amount of javascript coding. With Selenium however, not only was I able to pick the programming language from about half a dozen choices, but I was able to do just what I wanted done in under 20 lines of Python. In the case of Chrome, the server part of the browser driver is built by the Chrome development team, so I know the method calls will work as advertised. It gets even better though, since the <a href="https://w3c.github.io/webdriver/webdriver-spec.html" target="_blank">Selenium 'wire protocol'</a> is now a draft standard published by the W3C (WWW Consortium). I'm getting all kind of warm fuzzy feelings that this framework has heavy-weight industry support, and it won't go away anytime soon so my efforts won't be wasted.</p>
+
+<p>The official purpose for the Selenium framework is to perform QA testing on web applications and various browsers, on various operating platforms. I have a slightly different usage in mind, in that I am a fiend for creating browser launchers. These are short scripts which launch a browser, navigate to one or more pages, filling in textual form fields where needed, clicking buttons or otherwise submitting forms, and generally getting me logged into different web services which I use. There are a couple reasons I have for doing this. For one it is just butt-simple, especially when I am very busy with other things, to simply click a button and be logged in somewhere. The second reason is computer security, and unless you live under a rock you've noticed this is a hot topic right now (in fact for several years running). Your browser can be easily hooked using XSS (cross-site scripting), and then your cookies are exposed to an attacker. If you stay logged into online services then it is trivial for bad people to get your session cookies, and then they can just change your password, and you don't want to get pwned.</p>
+
+<h3>Setup and Usage</h3>
+<p>So the idea behind a browser launcher is to get logged in quickly, as needed, and then log out immediately when finished. Otherwise you spend half your time fumbling about navigating a web browser and looking for URLs and passwords. Actually there was a third reason I like to do this, and that is to stay abreast of webpage and browser technologies. Setting up these scripts involves examining the structure of a webpage and its elements. How easy is it to set up and use Selenium? From the documentation, here are the requirements.</p>
+<ul style="list-style-position: inside;">
+	<li>Chrome browser, installed in the default location</li>
+	<li>Language bindings provided by the Selenium project</li>
+	<li>A browser driver executable provided by the Chromium project</li>
+</ul>
+<p>The first item on the list should be obvious. See <a href="https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver" target="_blank">the Selenium wiki</a> for official documentation. The second item, in the case of Python, is obtained by installing the selenium package with the following command.</p>
+<pre>&gt; pip install selenium</pre>
+<p>The third item on the list can be obtained from <a href="https://sites.google.com/a/chromium.org/chromedriver/" target="_blank">the Chrome developers</a>. Your mileage may vary, but I believe it is wise to use the 64-bit version of this executable if you are using 64-bit Python. That's all for the setup. For me the hard part was the gymnastics involved in launching the correct things, with the correct environment. I have two versions of Python installed on my (windows) computer, so for testing Python scripts from a command-line, I created the following shortcut.</p>
+<pre>C:\Windows\System32\cmd.exe /k "set Path=%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;C:\ProgramsDev1\Python_x64_2711;C:\ProgramsDev1\Python_x64_2711\Scripts; &amp; E: &amp; cd E:\PythonProjects\ChromeLaunchScripts"</pre>
+
+<p>This just opens a DOS-box, sets the Path environment variable to the correct version of Python (in this case version 2.711), then changes my current working directory to E:\PythonProjects\ChromeLaunchScripts\ , which is where I store my launcher scripts. I also put the chromedriver.exe file in the same directory.</p>
+<p>Here is what a typical script looks like, to automate the Chrome browser in Python.</p>
+<pre><span class="k">from</span> <span class="nn">selenium</span> <span class="k">import</span> webdriver
+<span class="k">from</span> <span class="nn">selenium.webdriver.common.keys</span> <span class="k">import</span> Keys
+
+options <span class="o">=</span> webdriver<span class="o">.</span>ChromeOptions()
+options<span class="o">.</span>add_argument(<span class="s">&#39;--no-sandbox&#39;</span>)
+options<span class="o">.</span>add_argument(<span class="s">&#39;--disable-gpu&#39;</span>)
+options<span class="o">.</span>add_argument(<span class="s">&quot;--window-size=1762,1200&quot;</span>)
+options<span class="o">.</span>add_argument(<span class="s">&quot;--window-position=102,0&quot;</span>)
+
+driver <span class="o">=</span> webdriver<span class="o">.</span>Chrome(chrome_options<span class="o">=</span>options)
+driver<span class="o">.</span>get(<span class="s">&#39;https://wordpress.com/wp-login.php&#39;</span>);
+
+logincss <span class="o">=</span> <span class="s">&#39;form#loginform input#user_login&#39;</span>
+login <span class="o">=</span> driver<span class="o">.</span>find_element_by_css_selector(logincss)
+login<span class="o">.</span>send_keys(<span class="s">&#39;4draft&#39;</span>)
+
+pwdcss <span class="o">=</span> <span class="s">&#39;form#loginform input#user_pass&#39;</span>
+pwd <span class="o">=</span> driver<span class="o">.</span>find_element_by_css_selector(pwdcss)
+pwd<span class="o">.</span>send_keys(<span class="s">&#39;my password&#39;</span>)
+
+formcss <span class="o">=</span> <span class="s">&#39;form#loginform input.button&#39;</span>
+form <span class="o">=</span> driver<span class="o">.</span>find_element_by_css_selector(formcss)
+form<span class="o">.</span>submit()
+
+driver<span class="o">.</span>close()
+</pre>
+
+<p>From the command environment, run the script by issuing the command</p>
+<pre>&gt; Python scriptname.py</pre>
+<p><img src="/images/SeleniumImg0.jpg" alt="Command box executing python test1.py" /></p>
+
+<p>There isn't much in this basic script. They tell you to close the driver when you're finished with it, but the truth is that this sequence of steps goes so fast you may not even have a chance to see the browser opening. Because of that, and also because my intention is to have the browser remain open after the script finishes, I usually don't call driver.close() .</p>
+
+<p>Obviously there are other functions you can call to customize the script. In fact Selenium has a rich API for driving the browser navigation. After looking around the documentation, this is the best <a href="http://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/" target="_blank">API listing</a> that I found. If you look closely you'll noticed the language used here is javascript, but all the method names, parameters, class heirarchies, and example usage are provided. You'll have to translate these to your own language of choice. You can click the 'View Source' link in the upper-right corner to view the actual source code on github. There is quite a lot of functionality there, and much of it that I will probably never use.</p>
+
+<p>I also looked into ways of setting up single-click launchers for these scripts, since I don't always like to work from a command-line. My goal was a single-click launch, without having a DOS-box appear, and which could be run as a short-cut from another location. On MSWindows, this could be done using <u>AutoIt</u>. It could also be done using <u>PowerShell</u>, however I always hear people complaining about executing PowerShell scripts directly from the shell; apparently this is just too much power. For simplicity I turned to a <u>Visual Basic</u> script, such as this one.</p>
+
+<pre><span class="k">Set</span> ShellObj <span class="o">=</span> CreateObject (<span class="s">&quot;Wscript.Shell&quot;</span>)
+<span class="k">Dim</span> strArgs
+strArgs <span class="o">=</span> <span class="s">&quot;setenv.bat scriptname.py&quot;</span>
+ShellObj.Run strArgs, <span class="m">0</span>, <span class="k">true</span>
+</pre>
+
+<p>The setenv.bat file will generically set up the environment, much like I did in the Python command short-cut created earlier. Here are the contents of setenv.bat</p>
+<pre>set Path=%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;C:\ProgramsDev1\Python_x64_2711;C:\ProgramsDev1\Python_x64_2711\Scripts;
+E:
+cd E:\PythonProjects\ChromeLaunchScripts
+python %1</pre>
+
+<p>So what happens is the launcher.vbs script, when double-clicked from the Windows shell, will open an invisible DOS-box and execute setenv.bat , passing in scriptname.py as its only parameter; setenv.bat then creates the correct environment for running Python scripts, and then runs the Python script that was passed in as a parameter. I have all these files in the same directory by the way. Now I can create a short-cut to the .vbs launcher file and place it anywhere on my system. In fact I have a system toolbar on my desktop, and I can execute the .vbs files from a menu entry.</p>
+<p><img src="/images/SeleniumImg2.jpg" alt="System toolbar for launching shortcuts." /></p>
+
+<h3>Linux</h3>
+<p>For Linux, the setup and usage is identical to what I just described for the MSWindows system. This was in fact one of my goals, to use both a browser (Chrome) and a script language (Python) which work consistently the same across multiple operating environments. Note that in Linux, Selenium had difficulty figuring out where the chromedriver was located, so I had to place it on the system path, whereas in Windows I could place chromedriver in the same directory where the Python script was launched from. The big difference in Linux is in how to setup shortcuts and launchers, since these are somewhat dependent on your Linux distribution. I plan on writing an article which gives details on setting up a top-panel launcher menu in Gnome3 as a Gnome Shell Extension.</p>
+
+<p>I said earlier that in my Python automation scripts I decided to not call the driver.close() function. This is my choice, but it does lead to another problem (see the following image).</p>
+<p><img src="/images/SeleniumImg1.jpg" alt="Windows processes list, showing multiple chromedriver.exe open in memory." /></p>
+
+<p>After numerous invocations of your launcher scripts, you will end up with numerous orphaned chromedriver executables in memory, since they were never closed properly. The Selenium people never provided the functionality to close the driver while leaving the browser running, since it was never viewed as necessary for browser-webapp QA testing. As a result I was left to my own devices, and I have created some boiler-plate Python code which I add to every automation script. This additional Python code, shown below, simply identifies the chromedriver in memory and kills it, and this executes after the automation code finishes.</p>
+
+<pre><span class="k">import</span> <span class="nn">os</span>
+<span class="k">import</span> <span class="nn">signal</span>
+<span class="k">import</span> <span class="nn">ctypes</span>
+
+<span class="k">def</span> <span class="nf">linuxkill</span>(pstring):
+    <span class="k">for</span> line <span class="k">in</span> os<span class="o">.</span>popen(<span class="s">&quot;ps ax | grep &quot;</span> <span class="o">+</span> pstring <span class="o">+</span> <span class="s">&quot; | grep -v grep&quot;</span>):
+        fields <span class="o">=</span> line<span class="o">.</span>split()
+        pid <span class="o">=</span> fields[<span class="m">0</span>]
+        os<span class="o">.</span>kill(<span class="nb">int</span>(pid), signal<span class="o">.</span>SIGKILL)
+
+<span class="k">def</span> <span class="nf">winkill</span>(pstring):
+    <span class="nb">print</span> pstring
+    PyIds <span class="o">=</span> [<span class="nb">int</span>(line<span class="o">.</span>split()[<span class="m">1</span>]) <span class="k">for</span> line <span class="k">in</span> os<span class="o">.</span>popen(<span class="s">&#39;tasklist&#39;</span>)<span class="o">.</span>readlines()[<span class="m">3</span>:] <span class="k">if</span> line<span class="o">.</span>split()[<span class="m">0</span>] <span class="o">==</span> pstring]
+    <span class="k">for</span> pid <span class="k">in</span> PyIds:
+        <span class="c">#print pid</span>
+        os<span class="o">.</span>system(<span class="s">&quot;taskkill /F /pid %i&quot;</span> <span class="o">%</span> pid)
+
+<span class="k">if</span> os<span class="o">.</span>name <span class="o">==</span> <span class="s">&#39;nt&#39;</span>:
+    winkill(<span class="s">&#39;chromedriver.exe&#39;</span>)
+<span class="k">elif</span> os<span class="o">.</span>name <span class="o">==</span> <span class="s">&#39;posix&#39;</span>:
+    linuxkill(<span class="s">&#39;chromedriver&#39;</span>)
+</pre>
+
+<p>The three import lines go at the very top of the automation script file, and the rest of the code can go at the very bottom of the file. I have never tested this on an Android or MacOS system, but I imagine they work very much like it does on Linux, since Android and MacOS are both built on a Linux kernel.</p>
+
+<p>In case anyone is curious about toying with Selenium, I did some preliminary work using Notepad++ , since it performs syntax-highlighting on Python files, and code-folding as well. Later I moved to using Eclipse+Pydev for the code-completion (like intellisense) and library integration. Finally, if you are learning Selenium in the Python language, here is a <a href="http://selenium-python.readthedocs.io/index.html" target="_blank">great site</a> to use for a reference.</p>
+
+<div>&nbsp;</div>
+<p>-R. Foreman</p>
+<div>&nbsp;</div>
+
+
+	<div id="disqus_thread"></div>
+	<script>
+	    /**
+	     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+	     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+	     */
+	    /*
+	    var disqus_config = function () {
+	        this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+	        this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+	    };
+	    */
+	    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+	        var d = document, s = d.createElement('script');
+	        
+	        s.src = '//4draft.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+	        
+	        s.setAttribute('data-timestamp', +new Date());
+	        (d.head || d.body).appendChild(s);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+
+</div>
+
+<script src="/js/jquery-3.1.1.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/script.js"></script>
+
+<!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-91676417-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+
+</body>
+
+</html>
+
+

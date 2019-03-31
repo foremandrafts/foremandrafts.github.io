@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Communicating to the audience.">
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/pygments.css">
+	<link rel="stylesheet" href="/css/styles.css">
+	<title>ESP8266 Microcontroller, Getting Started</title>
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+<header class="bgimage">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-6">
+				<a href="https://foremandrafts.github.io/"><h1>Drafting my Thoughts</h1></a>
+			</div>
+			<div class="col-xs-6">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="https://www.github.com/foremandrafts">Github</a></li>
+					<li><a href="https://foremandrafts.github.io/archives.html">Archives</a></li>
+					<li><a href="https://foremandrafts.github.io/about.html">About</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-1">
+			</div>
+			<div class="col-xs-8">
+				<h4>Future is looking bright.. <span class="glyphicon glyphicon-sunglasses"></span></h4>
+			</div>
+		</div>
+	</div>
+</header>
+</nav>
+
+<div class="content container-fluid">
+
+    <h2>ESP8266 Microcontroller Board with PlatformIO</h2>
+<h5>January 30, 2017</h5>
+<p class="lead">One of the hottest microcontroller boards I've read about recently is the ESP8266. The reason it's popular is that it has a built-in full TCP/IP stack, along with a wifi antenna onboard. Also there is enough interest and awareness that it is programmable in several languages, including the Arduino API. I've seen several articles and videos on the ESP8266 recently, <a href="https://www.youtube.com/watch?v=AEQCABQGZNw#t=13m45s" target="_blank">such as this one</a>, and it definitely caught my interest. After briefly researching this online, I went ahead and purchased a recent incarnation of the ESP8266, <a href="https://www.adafruit.com/product/2821" target="_blank">the Adafruit Huzzah</a>.</p>
+
+<p>I'll give a little background and details for this chip before I relay my experiences on how to program it. There is a lot to like about the ESP8266, but early boards didn't have any voltage regulation, so people were frying the board as a first order of business when they received it (lol.. read some of <a href="https://www.sparkfun.com/products/13678" target="_blank">the comments on this page</a>). Adafruit came along and fixed that with the Huzzah, by adding a voltage regulator circuit. They also added a JST-PH port for mobile battery power, and the micro-USB connector will also charge any LiPo battery you have plugged in. This model also has the latest serial chip, the CP2104, for high-speed data uploads, as well as more flash memory (4Mb) than previous boards. Upcoming incarnations might even see onboard SD cards, and I think adding mass storage would be a smart direction to move since there currently is no device like this at such a small scale and price-point.</p>
+
+<hr />
+
+<h3>ESP8266 Development Frameworks</h3>
+<p><a name="ESP8266DevFrameworks"></a></p>
+<p>The <u>ESP8266</u> chip is made by a company called Espressif, and of course they put out an SDK, as well as examples of programming their device. You can download and read through some of their <a href="https://espressif.com/en/support/download/sdks-demos" target="_blank">example code here</a> , and <a href="https://github.com/espressif/ESP8266_RTOS_SDK" target="_blank">here as well</a>. The Espressif native code library appears (to me) somewhat unfriendly and difficult to follow for the average user. It's basic C-language code, but definitely not user-friendly. Some Russian guy with an outfit called MicrocontrollerKits put together <a href="http://microcontrollerkits.blogspot.com/2015/12/esp8266-eclipse-development.html" target="_blank">a setup for the Eclipse IDE</a>. This is basically the Espressif native code library, using MinGW gcc toolchains, and packaged into a series of Eclipse projects for C/C++. This appears to work, but in the end you're still looking at the same Espressif code which uses function and variable names that are not very descriptive, and hence the whole approach is difficult to work with. Here is the <a href="https://www.youtube.com/watch?v=tYU1O3mk3Yg" target="_blank">video describing this package</a> in case anyone is interested.</p>
+
+<p>You may have already noticed that Adafruit makes available a programming environment called <u>microPython</u> which can be used with the Huzzah board. From what I can tell it is basically Python language with the Arduino API, and I'm sure it's easy to use, although this was not the avenue I pursued. One thing that is also sure is that Python will not run as fast as C compiled object-code running on the microcontroller, and speed could be an issue on such a low-power device. There is another organization out there whose purpose is to make programming the whole ecosystem of microcontrollers much easier for the average user, and this initiative is called <b>PlatformIO</b>.</p>
+
+<hr />
+
+<h3>ESP8266 Development Tools, PlatformIO and Visual Studio</h3>
+<p><a name="ESP8266DevTools"></a></p>
+<p>The PlatformIO website is platformio.org , and to get started you should follow <a href="http://docs.platformio.org/en/latest/ide/atom.html#installation" target="_blank">their installation guide</a> as I did. The setup requires the following 3 packages.
+
+<ul style="list-style-type: none;">
+	<li>Some 2.7xx version of Python</li>
+	<li>CLang, aka LLVM (low-level Virtual Machine)</li>
+	<li>The PlatformIO IDE. It's basically a plugin for the Atom text-editor</li>
+</ul>
+Here is <a href="https://atom.io/packages/platformio-ide" target="_blank">more background on PlatformIO</a>. The PlatformIO IDE requires that Python be on your system path, so you may need a reboot after installing Python and before doing the PlatformIO install. The only link you need to start PlaformIO is one that looks like this.</p>
+<pre>&gt; C:\Users\YourUserName\AppData\Local\atom\app-1.13.0\atom.exe</pre>
+
+<p><img src="/images/ESP8266Post1Img1.jpg" alt="PlatformIO Startup Window" /></p>
+<p>&nbsp;</p>
+
+<p>Of course substitute whatever is your current version of atom in the above shortcut link (and also use your own username). When you launch PlatformIO it will automatically update the installed plugins and packages. If the <b>PlatformIO Core</b> doesn't update correctly, you can do it by downloading the file</p>
+<pre>https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py</pre>
+
+<p>into your Python directory, and then running the command</p>
+<pre>&gt; python get-platformio.py</pre>
+
+<p>PlatformIO still has a few kinks to work out, but at the 30,000-ft view this is by far the <u>easiest</u> and <u>best way</u> to program these microcontroller boards. The remainder of the <a href="http://docs.platformio.org/en/latest/ide/atom.html#installation" target="_blank">installation guide</a> gives good details on navigating the Atom user interface, as well as the PlatformIO plugin. <b>What's important to know</b> is that the PlatformIO IDE is good for managing code packages, as well as flashing your microcontroller board, but the programming editor is not that great. I looked around to find the best way to actually work with the Arduino API C-language code, and for MSWindows it turns out the community version of <u>Microsoft Visual Studio</u> works the best.</p>
+
+<p>Here are the <a href="http://docs.platformio.org/en/latest/ide/visualstudio.html" target="_blank">instructions for installing Visual Studio</a>. When the instructions talk about adding <b>platformio</b> to your path, what they're referring to is the file <em>pio.exe</em> located in your <u>python2.7xx/scripts</u> directory (this should already be on your path from when you installed Python). Visual Studio gives you <u>Syntax Highlighting</u>, <u>Code-folding</u>, <u>Intellisense</u>, and a number of other very useful tools. For example, you can generate a header dependency graph (in case you can't figure out where certain variables or functions are coming from) just by placing your cursor on a include-file name, then right-clicking and selecting 'Generate Graph of Include Files'. For anyone who is REALLY new to this, Intellisense is like a database of functions, variables, types, and objects that the editor 'knows about'. You can do things like hover your mouse over some piece of code and get information about it, and it will also provide a list of options when you start typing.</p>
+
+<p><img src="/images/ESP8266Post1Img2.jpg" alt="Visual Studio, Generate Graph of Include Files" />
+<img src="/images/ESP8266Post1Img3.jpg" alt="Header Files Dependency Graph" /></p>
+<p>&nbsp;</p>
+
+<p>These tools become more important as you start to deal with multiple libraries, including the Arduino API library itself, since it's not always clear where certain functions and variables are coming from. For all the bad things people say about Microsoft, one thing they have become very good at is programming languages and compilers, and Visual Studio is one of the best C/C++ development environments out there. Fortunately for us it's free now, because they used to charge thousands of dollars for it.</p>
+
+<p>When you use PlatformIO, it installs all the necessary code files in order to program your board. It's not necessary to install the Arduino IDE, since the Arduino API files are all provided for you by PlatformIO. You can create your projects from within the PlatformIO IDE (the graphical interface program), but I've found that it's just as easy to do it from a command-line. First create a directory, then open a command prompt (a DOS box) within that directory and issue a command like this.</p>
+<pre>&gt; platformio init --ide visualstudio --board huzzah</pre>
+
+<p>In the above command, platformio is an executable that was installed inside your <u>python2.7xx/scripts</u> directory when you installed PlatformIO (that's why having Python on your system path was important when you installed PlatformIO). The above command tells PlatformIO to create a project for the Huzzah board and the Visual Studio IDE. You can find your board's Id by looking <a href="http://platformio.org/boards" target="_blank">on this page</a>. Also, pio is a shorthand alias for platformio, so the following is an equivalent command.</p>
+<pre>&gt; pio init --ide visualstudio --board huzzah</pre>
+
+<p>When you create a PlatformIO project like this, it places all the support files in the following location.</p>
+<pre>&gt; C:\Users\YourUserName\.platformio\packages\</pre>
+
+<p>Any libraries you add to the project are also placed in the same location. After creating your PlatformIO project, assuming you have Visual Studio installed, you can open the project in Visual Studio just by double-clicking on the <u>.vcxproj</u> file from Windows Explorer.</p>
+
+<p><img src="/images/ESP8266Post1Img4.jpg" alt="Command-line Build of PlatformIO Project" />
+<img src="/images/ESP8266Post1Img5.jpg" alt="PlatformIO Project Files, Viewed from Windows Explorer" />
+<img src="/images/ESP8266Post1Img6.jpg" alt="Visual Studio Interface, with PlatformIO Project Open" /></p>
+<p>&nbsp;</p>
+
+<hr />
+
+<h3>ESP8266 Flash and Code Execution</h3>
+<p><a name="FlashAndExecute"></a></p>
+<p>Eventually I plan to explore advanced capabilities of the ESP8266, but for this first blog-post I'm going to keep it very simple. After inspection of <a href="https://learn.adafruit.com/adafruit-feather-huzzah-esp8266/pinouts" target="_blank">the Huzzah pin-out here</a>, I determined that pins 0 and 2 are connected to onboard Red and Blue LEDs, respectively, so I decided to use this for my initial testing. There is ample source-code in the public domain which show how to blink an LED using the Arduino API, so I worked up the following sample to blink the two LEDs in sequence.</p>
+<pre>
+<span class="k">/**</span>
+<span class="k"> * Blink</span>
+<span class="k"> * Turns Red LED on for 1/2 second, then off.</span>
+<span class="k"> * Then turns Blue on for 1/2 second, then off. Repeats.</span>
+<span class="k"> */</span>
+<span class="kp">#include</span> &quot;Arduino.h&quot;
+<span class="kp">#define</span> <span class="no">RedPin</span>    <span class="m">0</span>  <span class="k">// Connected to a Red LED</span>
+<span class="kp">#define</span> <span class="no">BluePin</span>    <span class="m">2</span>  <span class="k">// Connected to a Blue LED</span>
+
+<span class="k">void</span> <span class="nf">setup</span>()
+{
+  <span class="k">// initialize LED digital pin as an output.</span>
+  pinMode(<span class="no">RedPin</span>, <span class="no">OUTPUT</span>);
+  pinMode(<span class="no">BluePin</span>, <span class="no">OUTPUT</span>);
+}
+
+<span class="k">void</span> <span class="nf">loop</span>()
+{
+  <span class="k">// turn Red LED on (HIGH is the voltage level)</span>
+  digitalWrite(<span class="no">RedPin</span>, <span class="no">HIGH</span>);
+  <span class="k">// wait for half a second</span>
+  delay(<span class="m">500</span>);
+  <span class="k">// turn Red LED off by making the voltage LOW</span>
+  digitalWrite(<span class="no">RedPin</span>, <span class="no">LOW</span>);
+  <span class="k">// turn Blue LED on (HIGH is the voltage level)</span>
+  digitalWrite(<span class="no">BluePin</span>, <span class="no">HIGH</span>);
+   <span class="k">// wait for half a second</span>
+  delay(<span class="m">500</span>);
+  <span class="k">// turn Blue LED off by making the voltage LOW</span>
+  digitalWrite(<span class="no">BluePin</span>, <span class="no">LOW</span>);
+}
+</pre>
+<p>&nbsp;</p>
+
+<p>Building the project from Visual Studio is as simple as right-clicking on the project name, and selecting Build.</p>
+
+<p><img src="/images/ESP8266Post1Img7.jpg" alt="Visual Studio Interface, Building the Project" /></p>
+<p>&nbsp;</p>
+
+<p>You can also build the project from the PlatformIO IDE, by clicking the Build button along the left-hand toolbar.</p>
+
+<p><img src="/images/ESP8266Post1Img8.jpg" alt="PlatformIO Interface, Building the Project" /></p>
+<p>&nbsp;</p>
+
+<p>With regard to <u>flashing the device</u>, in order to communicate over USB you need to install one particular USB driver on your computer, which <a href="https://www.silabs.com/products/mcu/Pages/USBtoUARTBridgeVCPDrivers.aspx" target="_blank">you can download here</a>. Now when you plug your Adafruit Huzzah into the computer, a COM device should appear in the Device Manager.</p>
+
+<p><img src="/images/ESP8266Post1Img9.jpg" alt="Windows7 Device Manager, Communications Device" /></p>
+<p>&nbsp;</p>
+
+<p>Flashing your compiled code to the ESP8266 board is as simple as clicking the Upload button on the left-hand toolbar within the PlatformIO IDE.</p>
+
+<p><img src="/images/ESP8266Post1Img10.jpg" alt="PlatformIO IDE, Upload Button" /></p>
+<p>&nbsp;</p>
+
+<p>You'll see some text scroll by at the bottom of the IDE, and then the box may disappear. This is the default setting, that the 'Build Panel' closes automatically after completing, and it can be changed within the Packages settings. After the build completes, the microcontroller should start to perform the actions ascribed to it within the program. If yours doesn't, then try the flash again, and possibly power it off and on (with the USB connector). Here is an short animation of what it will look like when it runs correctly.</p>
+
+<p><img src="/images/ESP8266Post1Gif1.gif" alt="Adafruit Huzzah, Program Executing" /></p>
+<p>&nbsp;</p>
+
+<div>&nbsp;</div>
+<p>-R. Foreman</p>
+<div>&nbsp;</div>
+
+
+
+	<div id="disqus_thread"></div>
+	<script>
+	    /**
+	     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+	     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+	     */
+	    /*
+	    var disqus_config = function () {
+	        this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+	        this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+	    };
+	    */
+	    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+	        var d = document, s = d.createElement('script');
+	        
+	        s.src = '//4draft.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+	        
+	        s.setAttribute('data-timestamp', +new Date());
+	        (d.head || d.body).appendChild(s);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+
+</div>
+
+<script src="/js/jquery-3.1.1.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/script.js"></script>
+
+<!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-91676417-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+
+</body>
+
+</html>
+
+

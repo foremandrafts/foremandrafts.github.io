@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Communicating to the audience.">
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/pygments.css">
+	<link rel="stylesheet" href="/css/styles.css">
+	<title>New H170 Computer Build</title>
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+<header class="bgimage">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-6">
+				<a href="https://foremandrafts.github.io/"><h1>Drafting my Thoughts</h1></a>
+			</div>
+			<div class="col-xs-6">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="https://www.github.com/foremandrafts">Github</a></li>
+					<li><a href="https://foremandrafts.github.io/archives.html">Archives</a></li>
+					<li><a href="https://foremandrafts.github.io/about.html">About</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-1">
+			</div>
+			<div class="col-xs-8">
+				<h4>Future is looking bright.. <span class="glyphicon glyphicon-sunglasses"></span></h4>
+			</div>
+		</div>
+	</div>
+</header>
+</nav>
+
+<div class="content container-fluid">
+
+    <h2>H170 Computer Build</h2>
+<h5>December 18, 2016</h5>
+<p class="lead">After further reading on the very latest hardware, it is becoming clear to me that the speed of innovation is making many of our current devices obsolete almost as I write this, and that purchasing a high-end system doesn't make economic sense. Specifically the Thunderbolt 3 technology (at <em>40Gigabit/Second throughput</em>) will make nearly every other connector obsolete. Additionally mainboard link speeds, and main memory speeds are doubling and tripling within only a 2-3 year span of time. 5 years from now <em>fiber-optic wiring</em> may be the norm in a computer case, along with <em>10Gigabit ethernet</em>. Unless you have no computer at all, it makes no sense to waste money on anything near the high-end.</p>
+<p>A few days ago I began considering ways to minimize expense and still put together a decent workhorse which could be used to <u>offload processing tasks</u>. My thoughts turned to a <em>2006-model HP-Pavilion</em> which had crapped-out a couple years ago, and I began pulling it apart. This episode went about as you'd imagine, with lots of dust, and a pile of old parts sitting on my livingroom floor. Several hand-washings later I was able to get a good look inside the case. After a bit of measuring and googling I determined I could fit either a <u>micro-ATX</u> or a <u>mini-ITX</u> board into this box. The wheels began spinning in my brain as I imagined how a new system could be built.</p>
+<p>The box had a recent power-supply, purchased a couple years ago, and I believed this should have sufficient numbers and types of connectors. Similarly there were fans in this box which could be reused. I also had some spare hard-drives laying around, an early model <em>256GigaByte SSD</em>, and a couple <em>300GigaByte Velociraptors</em>. For a linux system, this should probably be more than enough storage. In fact with linux you can almost pick a distribution to match your computer speed and storage capabilities (with MSWindows you're kind of stuck with whatever Microsft gives you). The only things I would need to get the system running were a <u>motherboard</u>, <u>memory</u>, and a <u>CPU</u>. This was a good project, and it really didn't take very long to complete. It's been probably 20 years since I've put together a computer system from scratch, and I enjoyed doing this.</p>
+<p>I first researched motherboards, and decided that anything less than the <a href="https://en.wikipedia.org/wiki/List_of_Intel_chipsets#100.2F200_Series_chipsets" target="_blank">1151 socket generation of chipsets</a> would be too slow. I also didn't need to overclock, since that isn't the purpose of this computer. I narrowed my focus to the <em>H170 chipset</em> (it's basically the Z170 without overclocking capability and perhaps 2/3 the PCIe lanes). I was staring at two Gigabyte boards, a <a href="https://www.amazon.com/Gigabyte-LGA1151-Mini-ITX-Motherboard-GA-H170N-WIFI/dp/B015CQ8D9Q/" target="_blank">mini-ITX</a> and <a href="https://www.amazon.com/Gigabyte-LGA1151-Mini-ITX-Motherboard-GA-H170N-WIFI/dp/B0165YUEOQ/" target="_blank">micro-ATX</a>, over at Amazon. This is a nice way to research since you can get product close-ups by hovering the mouse over an image. I was torn between these two choices, but eventually opted for the micro-ATX due to the additional working space provided with the larger board, and also the upgradeability of this board (and for some reason, which I think was related to the onboard wifi and dual ethernet ports, the mini-ITX was about $40 more expensive). The micro-ATX has an <b>M.2 slot</b> on the top of the board, as well as a <b>Thunderbolt</b> connector, <b>64GigaByte memory</b> capacity, and more PCIe slots than the smaller board. The <u>micro-ATX</u> is in many ways like a full ATX board, but with a smaller form factor. If you choose a <u>mini-ITX</u> then you're settling with fewer features and no upgrade possibility.</p>
+<h3>Estimating Power Requirements</h3>
+<p>One of my concerns was whether the power-supply size would be adequate. To determine this I used a site called <a href="http://pcpartpicker.com/" target="_blank">PcPartPicker.Com</a> . Clicking on '<b>Start a System Build</b>' allows you to add current products to a virtual system, and the site will tell you the power consumption for the set of components you've selected. If you create a profile (site username+password) you can then name and save your build. It turns out the system I had in mind only consumed about 250Watts, which actually did surprise me a little bit. Regardless, the <u>400Watt psu</u> I had would be more than adequate. If I start adding daughter-cards and hard-disks then that might change, but initially I should be ok with a <u>400Watt psu</u>.</p>
+<p>Once the motherboard was decided, the memory and cpu were easy to pick out. Since I live about 2 blocks from a <a href="http://www.microcenter.com/" target="_blank">MicroWarehouse</a>, I am almost obliged to be a computer-geek, and I am. MicroWarehouse does price-matching for <em>Amazon</em> and <em>NewEgg</em>, so I ended up with a really sweet deal on these parts. I was expecting close to $600 expense, but I walked away with only $450 out-of-pocket. Originally I was looking at the <u>Intel Skylake 6600 i5</u> processor, but finally decided on a 6500 since it includes a cpu cooling fan with thermal paste pre-applied. There's nothing difficult about picking out a cpu cooler and applying thermal paste, but it's an additional expense and extra work for only an incremental speed gain (3.2GigaHertz on the 6500 versus slightly higher for the 6600 since it's overclockable). I decided I probably wouldn't notice the speed difference, and I have no intention of playing with clock speeds anyway.</p>
+<p>Installing a cpu, cooling fan, and memory onto a motherboard really is pretty trivial, but there are instructions if you need them (if nothing else use <a href="https://www.google.com/search?q=installing+cpu+cooling+fan+memory" target="_blank">Google or Youtube</a>). Here are a few photos at various stages of the process.
+	<ul style="list-style-type: none;">
+		<li><a href="/images/MoboBare.jpg" target="_blank">Motherboard with CPU, Fan, and Memory installed</a></li>
+		<li><a href="/images/CaseBare.jpg" target="_blank">Case before installing motherboard</a></li>
+		<li><a href="/images/CaseFinished1.jpg" target="_blank">Completed case, closed</a></li>
+		<li><a href="/images/CaseFinished2.jpg" target="_blank">Completed case, closed, with front panel</a></li>
+	</ul>
+It's hard to get a sense for the size of this case, but it's only 15 inches tall, a little smaller than a mid-tower case. I reused the wire running to the power switch and LEDs, but other than that I abandoned all the front-panel wiring from the old HP Pavilion. I pulled up <a href="http://h30434.www3.hp.com/t5/Desktop-Hardware-and-Upgrade-Questions/motherboard-layout-and-front-panel-connector-pinout/td-p/4810299" target="_blank">some old HP documentation</a> , and comparing with the new Gigabyte board manual I determined this original HP power wire could be plugged straight into the new board. I also learned the difference between the Gigabyte's 4-pin system fan connector and my fan's 3-pin connector was a VCC (voltage) pin, which makes use of <em>pulse width modulation</em>, allowing you to control fan speeds from software. As such it's ok to use a 3-pin wire on a 4-pin connector - you simply forego the speed control.</p>
+<p>Probably the most difficult part of this entire process was getting old hard-disks to fit snugly into a foreign case. This task involved pulling out a lot of old parts, cannibalizing, fitting and testing, well in advance of installing the motherboard. I also examined the <a href="http://www.computer-hardware-explained.com/images/computer-power-cables-labeled-2.jpg" target="_blank">PSU connectors</a> in detail to determine compatibility with the installed components. These are considerations you take for granted when buying new or letting someone else put things together. The <a href="/images/IOCutout.jpg" target="_blank">rear-panel IO cutout</a> (provided with the motherboard) was also on the agenda, and fortunately the HP case used standard sizes, so everything fit correctly. After so much planning, installing the board into the case and hooking up all the wires went without issue.</p>
+<h3>Powering Up</h3>
+<p>My <u>256Gb SSD</u> already had a bootable copy of <b>Kali Linux</b> on it, and I was crossing my fingers that this would <u>just work</u>. Microsoft installations usually involve finding the correct hardware drivers, while Linux has a reputation of finding things automatically. With ethernet plugged in, I plugged the power cable into the wall. After flipping some of the power switches for a minute or two, I got lights on the motherboard and spinning fans. I was thrilled to see the Gigabyte bios flash past on the display. I then glanced up to see the GRUB boot menu, and without thinking I just hit the enter button quickly. After only a second or two I was at a full Gnome3 desktop. This went more smoothly than I could have hoped.</p>
+<p>I initially performed the requisite <em>apt-get</em> software updates, which took over an hour because I hadn't used this boot disk in a while. After completion of software updates I rebooted the machine, and then tested all USB ports. Every USB device was recognized without any problem, both for the onboard headers and the USB3 expansion card. I also fired up GParted and created two new ext4 partitions, one each for the two <u>Velociraptors</u>, then rebooted the machine. Both mass storage volumes automatically mounted and appeared on the desktop, without any problem. This whole process was fairly painless, and now I have my secondary headless machine for offloading tasks.</p>
+<p>Several photos of the final power-up.</p>
+<ul style="list-style-type: none;">
+	<li><a href="/images/MoboInstalledRunning.jpg" target="_blank">Motherboard powered up, lights on and fans spinning</a></li>
+	<li><a href="/images/GigabyteBiosSetup.jpg" target="_blank">Gigabyte bios setup screen</a></li>
+	<li><a href="/images/Gnome3Desktop.jpg" target="_blank">Full Gnome3 desktop</a></li>
+	<li><a href="/images/SoftwareUpdates1.jpg" target="_blank">Running software updates</a></li>
+	<li><a href="/images/SoftwareUpdates2.jpg" target="_blank">Running software updates, wide view</a></li>
+</ul>
+<div>&nbsp;</div>
+<p>-R. Foreman</p>
+<div>&nbsp;</div>
+
+<h2>Update</h2>
+<h5>January 20, 2017</h5>
+<p>After working with this new system for a few weeks, I began to notice disturbing behaviors in the graphical interface of the Linux operating system. Specifically, some applications (GEdit) would take an inordinant amount of time to launch, and in many cases wouldn't launch at all (the system would just hang). I also noted the inability of some windows to resize correctly when edges were being dragged. I thought about this for a short while, and I couldn't imagine any reason this might happen except for the fact that I wasn't using a dedicated graphic processor. I had decided to use the Intel CPU to perform the work of a GPU as well, because it can. These aberrant behaviors appeared to be the result. The very next day I researched and purchased a new graphics card.</p>
+
+<p>The card I ended up choosing, <a href="http://www.microcenter.com/product/469260/Radeon_RX_460_Overclocked_2GB_GDDR5_Video_Card" target="_blank">a MSI Radeon Rx 460 OC with 2Gb DDR5 Ram</a>, was released in August of 2016, and this is relatively recent. Nonetheless it only cost me $95 , and after reviewing the specs of this card compared to other cards, I was satisfied this was my best choice. This card's profile is about 2 inches shorter than most other graphic cards, which was perfect for the tight case I was working with. The small size might also explain the fact that this card has no power connector (it gets its power entirely from the PCIe connection). I learned the power requirements for this graphics card were about 80Watts, which put my total system power required at 330W, well under my 400W PSU. More details about this card <a href="https://en.wikipedia.org/wiki/List_of_AMD_graphics_processing_units#Arctic_Islands_.284xx.29_Series" target="_blank">can be found here</a>.</p>
+
+<p>After installing the new Radeon card, the previous graphic anomalies did go away, thus confirming that the Intel CPU was likely being over-taxed by acting as both CPU and GPU. After that however I began to experience strange power-off events, at random times and for no explained reason. I suspected that some kind of hybernation or sleep mode had been triggered by installing this card. I followed <a href="https://sites.google.com/site/easytipsforlinux/disable-hibernate-and-suspend" target="_blank">the instructions here</a> to disable hybernate and suspend modes, and I have not experienced any unexpected shut-downs for several days now.</p>
+<div>&nbsp;</div>
+<p>&lt;/div&gt;</p>
+
+
+
+	<div id="disqus_thread"></div>
+	<script>
+	    /**
+	     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+	     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+	     */
+	    /*
+	    var disqus_config = function () {
+	        this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+	        this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+	    };
+	    */
+	    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+	        var d = document, s = d.createElement('script');
+	        
+	        s.src = '//4draft.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+	        
+	        s.setAttribute('data-timestamp', +new Date());
+	        (d.head || d.body).appendChild(s);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+
+</div>
+
+<script src="/js/jquery-3.1.1.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/script.js"></script>
+
+<!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-91676417-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+
+</body>
+
+</html>
+
+

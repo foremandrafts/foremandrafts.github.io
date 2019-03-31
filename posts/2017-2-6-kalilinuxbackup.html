@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Communicating to the audience.">
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/pygments.css">
+	<link rel="stylesheet" href="/css/styles.css">
+	<title>Linux Live USB and Clonezilla for Disaster Recovery</title>
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+<header class="bgimage">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-6">
+				<a href="https://foremandrafts.github.io/"><h1>Drafting my Thoughts</h1></a>
+			</div>
+			<div class="col-xs-6">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="https://www.github.com/foremandrafts">Github</a></li>
+					<li><a href="https://foremandrafts.github.io/archives.html">Archives</a></li>
+					<li><a href="https://foremandrafts.github.io/about.html">About</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-1">
+			</div>
+			<div class="col-xs-8">
+				<h4>Future is looking bright.. <span class="glyphicon glyphicon-sunglasses"></span></h4>
+			</div>
+		</div>
+	</div>
+</header>
+</nav>
+
+<div class="content container-fluid">
+
+    <h2>Kali Linux OS Backup-Restore</h2>
+<h5>February 6, 2017</h5>
+<p class="lead">If you play around most operating systems long enough, you will eventually encounter <u>a tragic, irreversible event where your primary boot drive is damaged beyond repair</u>. It might even be the result of malware, or some other external factor beyond your control. I've had this misfortune a couple times with MSWindows over the years. It usually takes <u>a good deal of time and effort to reinstall the operating system</u> just to get back to a basic working platform, not to mention that <u>some personal documents may be lost forever</u> after such an event. After installing Kali Linux recently, I realized it would be fairly simple to set up a process to perform regular backups of the entire boot drive. In this article I will detail the following steps.
+	<ol>
+		<li><b>Create a Linux live USB drive</b></li>
+		<li><b>Make the live USB drive persistent</b> so you can install software on it</li>
+		<li><b>Install and use Clonezilla</b> for backup/restore of the boot drive</li>
+		<li>Review <b>the process of backing-up and restoring</b> a disk drive</li>
+	</ol>
+</p>
+
+<hr />
+
+<h3>Writing the Linux Image to USB</h3>
+<p><a name="WritingLinuxImageToUSB"></a></p>
+<p>The first step is to download a copy of Kali Linux, and write the live distribution image to a USB disk. The folks at kali.org have a webpage describing this process, <a href="http://docs.kali.org/downloading/kali-linux-live-usb-install" target="_blank">located here</a>. Their approach involves use of a <u>.img</u> Kali image, and a program called <u>Win32DiskImager</u>. The only problem with their approach is that Win32DiskImager only works with .img files (not the more common .iso file) , and the .img Kali image is produced in far less variety than .iso builds are. The particular build I wanted only came as a .iso file, so I had to find another program to perform the USB write. The program I chose is named <u>Rufus</u>, and it has a <b>good reputation for reliability</b>.</p>
+
+<p>First <a href="https://archive.kali.org/kali-images/kali-weekly/" target="_blank">download Kali Linux</a> (I picked the amd64-bit build, <u>.iso</u> file). <b>Picking a really recent build at this stage avoids a lengthy software update after applying persistence</b>. I like the weekly builds here because they provide a SHA1 checksum to verify you got a good download. Next <a href="http://rufus.akeo.ie/" target="_blank">download Rufus image writer</a>. Rufus doesn't require an installation - just run the executable. Rufus also doesn't require that you preformat the disk. It will recognize an unformatted, unlabelled USB disk and provide them in a list - just pick your USB disk by size (if you don't how big your USB drive is, then you've got other issues). You can give it a label (New Volume Label), but I left everything else as default. You need to select an image to write, using the little disk icon button (I circled this in the image). After selecting your <u>.iso</u> image, click Start.</p>
+
+<p><img src="/images/LinuxBackupRecoverImg1.jpg" alt="Rufus USB Imager Dialog" /></p>
+<p>&nbsp;</p>
+
+<p>Before starting, Rufus will prompt you to select an image write mode. <b>It's important to select 'Write in DD Image Mode'</b>, or else when you boot the USB disk to perform an installation it will go into an infinite loop looking for the CD-drive (and it will never find it because this is a USB disk, not a CD). Click Ok to the next dialog which acknowledges the disk will be overwritten, then let the image writer complete the job, and then close Rufus. The resulting USB stick will be unrecognizable from MSWindows because it has a Linux ext4 partition on it.</p>
+
+<p><img src="/images/LinuxBackupRecoverImg2.jpg" alt="Rufus USB Imager, DD Image Mode Selection" />
+<img src="/images/LinuxBackupRecoverImg3.jpg" alt="Rufus USB Imager, Performing Image Write" /></p>
+<p>&nbsp;</p>
+
+<hr />
+
+<h3>Kali Live USB, Adding Persistence</h3>
+<p><a name="KaliLiveUSBAddPersistence"></a></p>
+<p>Now that you have the USB live (bootable) disk, you can boot into it from a new computer. If you haven't installed Kali Linux to a hard-drive, you should do that next, although I won't be covering that process. To add persistence to the Kali Live USB disk, <u>first boot into a full Kali hard-drive installation</u> and access the USB stick from there. Once again, the people at kali.org have provided instructions for doing this, <a href="http://docs.kali.org/downloading/kali-linux-live-usb-persistence" target="_blank">located here</a>. Instead of following those instructions exactly, I took a shortcut by just doing everything within the program gparted, which is a graphical front-end for the parted partition editor.</p>
+
+<p>My copy of Kali had gparted already installed, but if yours doesn't then it's easy enough to install with the following command.</p>
+<pre>&gt; apt-get install gparted</pre>
+
+<p><b>Gparted</b> can be launched from the <u>topbar Applications menu</u>, under <u>Usual applications</u> &#124; <u>System tools</u> &#124; <u>Administration</u>. Once it launches you can select the USB device with the drop-down menu (upper-right corner). Right-click the Unallocated space in the USB drive, and select New. Change the filesystem type to ext3 and give it the label of '<b>persistence</b>', and click Ok. Now click the green checkmark button in the menubar to apply the changes. After the new partition is created, close out of gparted.</p>
+
+<p><img src="/images/LinuxBackupRecoverImg4.jpg" alt="GParted Application Launch" />
+<img src="/images/LinuxBackupRecoverImg5.jpg" alt="GParted Image1" />
+<img src="/images/LinuxBackupRecoverImg6.jpg" alt="GParted Image2" />
+<img src="/images/LinuxBackupRecoverImg7.jpg" alt="GParted Image3" /></p>
+<p>&nbsp;</p>
+
+<p>Rather than try to fiddle with mounting the new partition, I found it easier just to <u>reboot and let the system mount it for me</u>. Once I reboot, the persistence partition appears as an icon on my Kali desktop, and I can open it in the file browser just by double-clicking on the icon. Once it opens in the Nautilus file browser, I right-click and open a terminal, for the purpose of creating a single file in the partition. When the terminal opens, enter the following command.</p>
+<pre>&gt; echo "/ union" &gt; ./persistence.conf</pre>
+
+<p>That's it. Close the terminal, close the file browser, and reboot into the Kali Live USB device. Since it now has persistence, it's now possible to install software and have it saved to the disk. To boot into the Kali Live USB disk, at your computer boot menu you should <u>select the 2nd partition on the Live USB stick</u> (where the GRUB menu is at), then when the GRUB menu appears <u>select the 'Live USB with Persistence' option</u>.</p>
+
+<p><img src="/images/LinuxBackupRecoverImg8.jpg" alt="GRUB Boot Menu, Select Kali Live Persistence" /></p>
+<p>&nbsp;</p>
+
+<hr />
+
+<h3>Backup-Restore Using Clonezilla</h3>
+<p><a name="BackupRestoreWithClonezilla"></a></p>
+<p>Once you are booted into your Kali Live USB Gnome3 desktop, the first task with any new system is to perform software updates, with the following commands.</p>
+<pre>&gt; apt-get update
+&gt; apt-get upgrade
+&gt; apt-get dist-upgrade
+&gt; apt-get autoremove
+</pre>
+
+<p>If you chose a recent build of Kali, then this step will be a very short process (less than 5 minutes). <b>Clonezilla</b> is an easy installation, with this next command.</p>
+<pre>&gt; apt-get install clonezilla</pre>
+
+<p>I have a couple platter-based Western Digital Velociraptors installed in this computer, so my plan was to store the backup images on one of these. In my experience with <b>disk-drive calamities</b>, the tragedy always occurs with boot drives, and essentially never happens to secondary storage drives. </p>
+
+<hr />
+
+<h4><u>Performing the Backup</u></h4>
+<p><a name="PerformingTheBackup"></a></p>
+<p><b>Clonezilla</b> is a <u>text-based program</u> (using a development library called ncurses), so you launch it from a terminal just by typing its name 'clonezilla', and <u>navigate around using tabs, arrows, and the space key</u>. This is a very easy program to use, so I won't go through a lot of detail here. Of course we're cloning from disk to an image file, and you select the disk you wish to image as well as a save location. For nearly every option I was choosing the default, so for me this process was a sequence of enter keys. At one point Clonezilla needs to identify the likely places to store the backup, and <b>if one of your drives is not being recognized, then you have to make sure to dismount them</b> (see next image).</p>
+
+<p><img src="/images/LinuxBackupRecoverImg9.jpg" alt="Nautilus File Manager, Unmounting a Volume" /></p>
+<p>&nbsp;</p>
+
+<p>The actual backup went very quickly. On a 205 Gigabyte SSD with 17 Gigabyte being used, it took just under 4 minutes, and the resulting set of backup files comprised about 6.5 Gigabyte of data. During the process, <b>Clonezilla</b> mounted the volume where data was to be saved, at the following location.</p>
+<pre>/home/partimag/backupname</pre>
+
+<p>Afte completion I unmounted this using <b>GParted</b>, and the disk volume was immediately viewable in <b>Nautilus</b>, containing the backup folder with all its data. I performed a full-disk backup, so all partitions on the disk were saved, however it is possible to perform the backup on a single partition. Clonezilla also offered to check the data to determine if a restore could be performed, and this was successful. I also learned during this process that I can back up a MSWindows system just as easily, although I haven't tried this.</p>
+
+<p><img src="/images/LinuxBackupRecoverImg10.jpg" alt="Clonezilla, Selecting Backup Location" />
+<img src="/images/LinuxBackupRecoverImg11.jpg" alt="Clonezilla, Operation to Perform" />
+<img src="/images/LinuxBackupRecoverImg12.jpg" alt="Clonezilla, Selecting Disk to Backup" />
+<img src="/images/LinuxBackupRecoverImg13.jpg" alt="Clonezilla, Backing up Partition" /></p>
+<p>&nbsp;</p>
+
+<hr />
+
+<h4><u>Restoring Backed-Up Data to Disk</u></h4>
+<p><a name="RestoringBackupToDisk"></a></p>
+<p>This procedure wouldn't be complete without testing to see if I could restore from the saved data, and successfully boot into the restored disk. Booted into the Kali Live USB environment, I used <b>GParted</b> to delete all partitions on the disk that I had backed up. Next I used <b>Clonezilla</b> to restore the disk partitions using the backed up data. I then rebooted into the SSD which had just been restored, and this all occurred without any errors. At this point I'm satisfied that my Kali Live USB with persistence can be used to recover from boot drive disaster.</p>
+
+<p><img src="/images/LinuxBackupRecoverImg14.jpg" alt="Clonezilla, Operation to Perform" />
+<img src="/images/LinuxBackupRecoverImg15.jpg" alt="Clonezilla, Selecting Data to Restore From" />
+<img src="/images/LinuxBackupRecoverImg16.jpg" alt="Clonezilla, Select Disk to Restore To" /></p>
+
+<div>&nbsp;</div>
+<p>-R. Foreman</p>
+<div>&nbsp;</div>
+
+
+
+	<div id="disqus_thread"></div>
+	<script>
+	    /**
+	     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+	     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+	     */
+	    /*
+	    var disqus_config = function () {
+	        this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+	        this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+	    };
+	    */
+	    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+	        var d = document, s = d.createElement('script');
+	        
+	        s.src = '//4draft.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+	        
+	        s.setAttribute('data-timestamp', +new Date());
+	        (d.head || d.body).appendChild(s);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+
+</div>
+
+<script src="/js/jquery-3.1.1.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/script.js"></script>
+
+<!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-91676417-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+
+</body>
+
+</html>
+
+

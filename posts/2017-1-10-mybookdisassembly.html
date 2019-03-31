@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Communicating to the audience.">
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/pygments.css">
+	<link rel="stylesheet" href="/css/styles.css">
+	<title>MyBook Drive Conversion from USB3 to SATA3</title>
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+<header class="bgimage">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-6">
+				<a href="https://foremandrafts.github.io/"><h1>Drafting my Thoughts</h1></a>
+			</div>
+			<div class="col-xs-6">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="https://www.github.com/foremandrafts">Github</a></li>
+					<li><a href="https://foremandrafts.github.io/archives.html">Archives</a></li>
+					<li><a href="https://foremandrafts.github.io/about.html">About</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-1">
+			</div>
+			<div class="col-xs-8">
+				<h4>Future is looking bright.. <span class="glyphicon glyphicon-sunglasses"></span></h4>
+			</div>
+		</div>
+	</div>
+</header>
+</nav>
+
+<div class="content container-fluid">
+
+    <h2>MyBook Transformation, External USB3 to Internal SATA3</h2>
+<h5>January 10, 2017</h5>
+<p class="lead">External USB3 disk-drives have become popular in the last few years, primarily due to their low cost and high capacity. I speak from experience, as I own three of these, a 3TeraByte drive purchased about 5 years ago, another 4TeraByte drive purchased 3 years ago, and finally an 8TeraByte drive acquired within the last month. These work about as advertised, however there were two issues which over time began to become quite annoying. Eventually this situation led to rash measures, the destruction of the external protective casing of the Western Digital Mybook to expose the SATA3 internal disk-drive inside.</p>
+
+<p><u>The first annoyance</u> was a rather lengthy delay (10 seconds or more) to access the drive after some period of inactivity. Even with slow internal disk-drives you don't have to wait more than 1/2 second to get a response, <u>ever, under any circumstance</u>. I've never actually learned the reason for this. The problem could my motherboard/CPU pair and the fact that they don't have any native USB3 support, and PCIe lanes are needed to create USB3 ports. It could also be the USB3-SATA3 circuit inside the MyBook has some kind of protection mechanism which prevents the drive from spinning up too fast, or perhaps they're kept at 0 RPM when not in use and require extra time to spin up to speed. I don't know what the issue was, and I never spent any time researching other peoples' experiences. However, I don't enjoy accessing a disk-drive and sitting for part of a minute watching nothing, because it makes me think something is very wrong with my computer hardware.</p>
+
+<p>The <u>second troubling circumstance</u> was that adding so many USB3 connections began to cause operational problems with my motherboard. After I had added a couple PCIe expansion cards which created a total of 8 USB3 ports, other parts of the motherboard began to experience failures. For example sound stopped working, the USB3 headers stopped working, and the boot process began failing in random ways. After removing the USB3 expansion cards, the failures disappeared. In fact after going through the process I describe below, I can happily say that the computer boot speed has increased by a factor of 10 or more, and all the USB3 motherboard headers are now fully functional. I can only surmise that I had run into a PCIe lane limit, a limitation of the chipset and CPU being used.</p>
+
+<h3>The MyBook Dissassembly</h3>
+<p><a name="1stMyBookDisassembly"></a></p>
+<p>For the afore-mentioned reasons, I began to look at ways of eliminating my external USB3 devices (at least the powered ones, such as mass storage devices). A modest amount of research revealed that other people had deconstructed their MyBook cases and found an internal SATA3 drive. I got a wild hair one day and decided to just go ahead and do this, using my most recent purchase, the 8TeraByte drive. Be aware that trying this would probably void any warranty you might have on these external drives.</p>
+
+<p>Before beginning, I disconnected all cables (power and data) from the MyBook device, and used protective eyewear in case plastic pieces came flying up at my face. I began by prying at the fan vents along the edges, ever so gently so as not to damage the contents of the case. Eventually I simply broke the venting slats and tore them away, on both sides of the case. To do this I used a couple screw-drivers as prybars, and some pliers to tear away the plastic. After that I learned there was an internal plastic sleeve that was moving freely, and I slid this out and away from the case. Below I've posted photos at various stages of this process, and I know these aren't the most exciting pictures, but they may help someone going through this procedure at some point. After pulling the drive free from the case, I found there was rubber bumper material and retaining screws which could be removed. I also found that the USB3-SATA3 converter circuit board was held in place by a single screw, and once removed the drive itself was a simple 3.5 inch SATA platter-based disk-drive.
+	<ul style="list-style-type: none;">
+		<li><a href="/images/8TbImg1.jpg" target="_blank">WDMyBook 8Tb Image1</a></li>
+		<li><a href="/images/8TbImg2.jpg" target="_blank">WDMyBook 8Tb Image2</a></li>
+		<li><a href="/images/8TbImg3.jpg" target="_blank">WDMyBook 8Tb Image3</a></li>
+		<li><a href="/images/8TbImg4.jpg" target="_blank">WDMyBook 8Tb Image4</a></li>
+		<li><a href="/images/8TbImg5.jpg" target="_blank">WDMyBook 8Tb Image5</a></li>
+		<li><a href="/images/8TbImg6.jpg" target="_blank">WDMyBook 8Tb Image6</a></li>
+		<li><a href="/images/8TbImg7.jpg" target="_blank">WDMyBook 8Tb Image7</a></li>
+		<li><a href="/images/8TbImg8.jpg" target="_blank">WDMyBook 8Tb Image8</a></li>
+		<li><a href="/images/8TbImg9.jpg" target="_blank">WDMyBook 8Tb Image9</a></li>
+		<li><a href="/images/8TbImg10.jpg" target="_blank">WDMyBook 8Tb Image10</a></li>
+	</ul>
+</p>
+
+<p>After cleaning some dust off the SATA3 drive, I installed it internally in my desktop computer, and it worked flawlessly. What is more the long delay when accessing the disk was no longer there. I subsequently learned from handling this disk that when plugged into power, the platters spin continuously. It's an interesting effect actually, because when you handle a powered disk like this, it has the motion of a gyroscope (which is what it is, with an internal part that is spinning at high speed). I was thrilled by these events, and decided to look into ways of converting all my external MyBook USB3 disks into internal SATA3 disks.</p>
+
+<h3>SATA3 Drive Enclosure</h3>
+<p><a name="Sata3DriveEnclosure"></a></p>
+<p>This journey next led me to read up on disk drive enclosures. Many of them use USB3 for connecting the computer to the (external) enclosure, and this didn't interest me. What did catch my eye were references to a 'port multiplier' circuit using an eSATA connection between computer and external drive enclosure. I had no experience at all with drive enclosures, but this piqued my curiosity because it sounded exactly like what I wanted, more SATA3 connections without using additional PCIe lanes. I found a likely drive enclosure on <u>NewEgg</u>, the <a href="http://www.newegg.com/Product/Product.aspx?Item=N82E16816111455" target="_blank">Sans Digital TR4M6GNC</a> , and because it was so inexpensive ($85) I just took the chance and bought it.</p>
+
+<p>My desktop machine has a couple 6Gbs eSATA connectors which come directly off the motherboard as headers. When the <b>Sans Digital</b> enclosure arrived, it didn't work. It powered up correctly, and drives that I put inside it powered up, but there was nothing I could do to make the drive become recognized on my computer (and I tried many things, including software driver updates). I entertained the possibility that my eSATA headers were malfuntioning, as several other things were not working correctly on this computer, so I saw a very inexpensive (port multiplier) <a href="http://www.newegg.com/Product/Product.aspx?Item=9SIA2W03ZK2940" target="_blank">eSATA expansion card</a> and bought it. When the card arrived, I tried it in my primary desktop, as well as the secondary computer I built recently, but nothing worked. After reading other buyer comments on <u>Amazon</u> concerning this particular enclosure, I concluded it was probably defective, and that it had a high incidence of failure (due to something called an eSATA repeater).</p>
+
+<p>I returned the <b>Sans Digital</b> product for a refund (but kept the eSATA expansion card to use with my secondary computer), and took a chance with another enclosure which had good customer reviews on <u>Amazon</u>, the <a href="https://www.amazon.com/dp/B003X26VV4/ref=psdc_160354011_t1_B004WNLOF6" target="_blank">Mediasonic Probox HF2-SU3S2</a>. This drive enclosure did work correctly, right out of the box, with my desktop 6Gbs eSATA connectors as well as the expansion card, and it worked correctly both in my Windows7 machine and my secondary Linux box. I was of course thrilled by this, so I picked up a <a href="https://www.amazon.com/StarTech-6-Feet-Shielded-External-ESATA6/dp/B000ENYXZ6/ref=pd_sim_147_2" target="_blank">slightly longer 6ft eSATA cable from Amazon</a> (the drive enclosure comes with a 3ft eSATA cable) , and began the process of converting my other MyBook drives from USB3 to SATA3. One benefit of using the <b>Mediasonic</b> enclosure is that the maximum size drive recognized is 8Tb, versus 6Tb for the <b>Sans Digital</b> enclosure, so <b>Mediasonic</b> offers a slightly larger capacity.</p>
+
+<p>When using the <b>Mediasonic Probox</b> enclosure, you have to read the instructions, because there are 3 buttons and several modes of operation. Once I had set the interface to eSATA, and the Sync light to orange, the enclosure worked without issue (and I keep the fan setting on high at all times). There are customer comments on <u>Amazon</u> which describe these controls in great detail. Windows7 doesn't always recognize hot-swapped SATA3 drives (you may need to reboot), but that seems to be a Microsoft issue, because Linux recognizes the drives the second they are connected. In every respect the drives behave identically in the external drive enclosure and port multiplier circuitry as they would when connected inside a computer case (with internal SATA3 connections).</p>
+
+<p>The only other thing worth noting here is that the <b>Western Digital</b> USB3 (external) drives provide some kind of control processing which allows drives larger than 2Tb to be fully utilized even though it was not initialized using GPT. The geeks among us know that Microsoft windows cannot see disk-drive space beyond 2Tb unless it is initialized using GUID Partition Table (GPT). Two of my three drives were not initialized using GPT, and I would have lost my data if I had not tranferred the drives over empty. When adding those two drives as SATA3, they both had to be reinitialized with GPT, so any data on them would have been lost. Also just an FYI, when initializing a drive as GPT, a 120Mb partition is created (called the Microsoft Reserved Partition), and this can be safely deleted if the drive won't be used as a boot disk.</p>
+
+<h3>Disassembling My Remaining MyBook USB3 Drives</h3>
+<p><a name="RemainingMyBookDisassemblies"></a></p>
+<p>I don't want to get too long-winded with this blog-post, so I'll just provide the photos I took, and say that each of the <b>Western Digital</b> MyBooks was slightly different. However the approach to disassembling them was basically the same - get a screwdriver under the ventilation slats and pry, then get a second screwdriver in there to pry and lift, and use plyers to pull the ventilation slats up and away from the enclosure. Be careful not to jam the screwdrivers down into the enclosure or you might damage the disk-drive, and definitely put goggles on in case something flies up into your face.</p>
+<p>3Tb WD MyBook Photos
+	<ul style="list-style-type: none;">
+		<li><a href="/images/3TbImg1.jpg" target="_blank">WDMyBook 3Tb Image1</a></li>
+		<li><a href="/images/3TbImg2.jpg" target="_blank">WDMyBook 3Tb Image2</a></li>
+		<li><a href="/images/3TbImg3.jpg" target="_blank">WDMyBook 3Tb Image3</a></li>
+		<li><a href="/images/3TbImg4.jpg" target="_blank">WDMyBook 3Tb Image4</a></li>
+		<li><a href="/images/3TbImg5.jpg" target="_blank">WDMyBook 3Tb Image5</a></li>
+		<li><a href="/images/3TbImg6.jpg" target="_blank">WDMyBook 3Tb Image6</a></li>
+		<li><a href="/images/3TbImg7.jpg" target="_blank">WDMyBook 3Tb Image7</a></li>
+		<li><a href="/images/3TbImg8.jpg" target="_blank">WDMyBook 3Tb Image8</a></li>
+		<li><a href="/images/3TbImg9.jpg" target="_blank">WDMyBook 3Tb Image9</a></li>
+	</ul>
+</p>
+<p>4Tb WD MyBook Photos
+	<ul style="list-style-type: none;">
+		<li><a href="/images/4TbImg1.jpg" target="_blank">WDMyBook 4Tb Image1</a></li>
+		<li><a href="/images/4TbImg2.jpg" target="_blank">WDMyBook 4Tb Image2</a></li>
+		<li><a href="/images/4TbImg3.jpg" target="_blank">WDMyBook 4Tb Image3</a></li>
+		<li><a href="/images/4TbImg4.jpg" target="_blank">WDMyBook 4Tb Image4</a></li>
+		<li><a href="/images/4TbImg5.jpg" target="_blank">WDMyBook 4Tb Image5</a></li>
+		<li><a href="/images/4TbImg6.jpg" target="_blank">WDMyBook 4Tb Image6</a></li>
+	</ul>
+</p>
+<p>Mediasonic Probox Photos
+	<ul style="list-style-type: none;">
+		<li><a href="/images/ProboxImg1.jpg" target="_blank">Mediasonic Probox Image1</a></li>
+		<li><a href="/images/ProboxImg2.jpg" target="_blank">Mediasonic Probox Image2</a></li>
+		<li><a href="/images/ProboxImg3.jpg" target="_blank">Mediasonic Probox Image3</a></li>
+		<li><a href="/images/ProboxImg4.jpg" target="_blank">Mediasonic Probox Image4</a></li>
+		<li><a href="/images/ProboxImg5.jpg" target="_blank">Mediasonic Probox Image5</a></li>
+		<li><a href="/images/ProboxImg6.jpg" target="_blank">Mediasonic Probox Image6</a></li>
+		<li><a href="/images/ProboxImg7.jpg" target="_blank">Mediasonic Probox Image7</a></li>
+		<li><a href="/images/ProboxImg8.jpg" target="_blank">Mediasonic Probox Image8</a></li>
+		<li><a href="/images/ProboxImg9.jpg" target="_blank">Mediasonic Probox Image9</a></li>
+	</ul>
+</p>
+
+<div>&nbsp;</div>
+<p>-R. Foreman</p>
+<div>&nbsp;</div>
+
+
+
+	<div id="disqus_thread"></div>
+	<script>
+	    /**
+	     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+	     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+	     */
+	    /*
+	    var disqus_config = function () {
+	        this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+	        this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+	    };
+	    */
+	    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+	        var d = document, s = d.createElement('script');
+	        
+	        s.src = '//4draft.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+	        
+	        s.setAttribute('data-timestamp', +new Date());
+	        (d.head || d.body).appendChild(s);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+
+</div>
+
+<script src="/js/jquery-3.1.1.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/script.js"></script>
+
+<!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-91676417-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+
+</body>
+
+</html>
+
+

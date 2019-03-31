@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Communicating to the audience.">
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/pygments.css">
+	<link rel="stylesheet" href="/css/styles.css">
+	<title>Monitor WAN Traffic with OpenWRT</title>
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+<header class="bgimage">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-6">
+				<a href="https://foremandrafts.github.io/"><h1>Drafting my Thoughts</h1></a>
+			</div>
+			<div class="col-xs-6">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="https://www.github.com/foremandrafts">Github</a></li>
+					<li><a href="https://foremandrafts.github.io/archives.html">Archives</a></li>
+					<li><a href="https://foremandrafts.github.io/about.html">About</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-1">
+			</div>
+			<div class="col-xs-8">
+				<h4>Future is looking bright.. <span class="glyphicon glyphicon-sunglasses"></span></h4>
+			</div>
+		</div>
+	</div>
+</header>
+</nav>
+
+<div class="content container-fluid">
+
+    <h2>Watching my WAN with OpenWRT</h2>
+<h5>January 2, 2017</h5>
+<p class="lead">Since I started working with <a href="https://openwrt.org/" target="_blank">OpenWRT</a> a few years ago, one thing I've always been curious about is seeing what kind of <u>uninvited traffic</u> I am getting on the internet (WAN, or Wide Area Network) side of my router. The WAN side of a router is like your front-door, and I think it's a natural thing to wonder who is there fiddling with the lock. Sadly most people don't have the technical knowledge to even set this kind of thing up, let alone decipher the traffic. I am slowly getting to the point where I can do this, and I'll lay out a few approaches to setting up this kind of traffic monitor.</p>
+
+<p>A common approach you find people talk about is to <a href="http://www.ayomaonline.com/security/analyzing-network-traffic-with-openwrt/" target="_blank">alter your firewall so that packets are mirrored to another machine</a>. While this works, I'm not a big fan of this method, primarily because the router firewall is so important to your local network. Nearly all the computers on my LAN <b>do not</b> have their own firewall, so the router firewall is the only thing standing between each of them and some very ugly things on the internet. <u>Firewalls are complex</u>, despite what the whiz-kid down the street tells you, and if you muck up your router firewall it can be difficult to diagnose and correct. Fortunately there are other ways to obtain the WAN traffic.</p>
+
+<p><img src="/images/NetworkConfig.jpg" alt="Local Area Network configuration, showing monitoring computer and internet cloud." /></p>
+
+<h3>TcpDump and Netcat</h3>
+<p>The idea here is somehow direct a copy of your WAN packets to a secondary machine. While modern consumer-grade routers are fairly robust, they are still nowhere near as powerful as a full-power desktop or laptop machine, so it's advisable to perform analysis and collection of data on one of these. <u>TcpDump</u> is a great tool for dumping (to StdOut, or a console terminal) a copy of your packet stream on a particular interface. In the Linux world they call this a "Tee" because it makes a duplicate without interrupting the original stream. The other utility I use is called <u>Netcat</u>, which does nothing except move data from one network endpoint to another. With these two tools, you can mirror data from your router's WAN interface to another computer.</p>
+
+<p>OpenWRT may have some built-in functionality for Netcat, but I went ahead and installed everything from package repositories. From an OpenWRT command-line, the following commands will install everything needed.</p>
+<pre>&gt; opkg update
+&gt; opkg install netcat
+&gt; opkg install tcpdump</pre>
+
+<p>I can also look at the interfaces on my OpenWRT device and learn their IP addresses using the <b>ifconfig</b> command.</p>
+<p><img src="/images/OpenWrtIPs.gif" alt="Display of IP addresses for eth0 and br-lan. Gateway br-lan IP address is 192.168.1.1" /></p>
+
+<p>From experience I know the br-lan interface (bridged-lan) is the set of connections allowing my wired and wireless devices to connect to my router. The other interface eth0 is the WAN, or the internet side of the router. If you run the following command at an <b>OpenWRT terminal</b>, it will dump all your WAN traffic to the screen (until you hit ctrl-c). The command options listed there are basically to optimize for speed and efficiency, and to perform the raw packet dump to the StdOut terminal interface.</p>
+<pre>&gt; tcpdump -s 0 -U -n -w - -i eth0</pre>
+
+<p>If my monitoring computer is on 192.168.1.204 and I wish to receive the data on port 61000, then I would run this command from OpenWRT, which pipes the output from tcpdump into the netcat utility which will then transfer the data over to the other machine.</p>
+<pre>&gt; tcpdump -s 0 -U -n -w - -i eth0 | netcat 192.168.1.204 61000</pre>
+
+<p>On the <b>monitoring computer</b>, you would receive the data with a command like this, which uses the netcat -l or listen option.</p>
+<pre>&gt; netcat -l -p 61000</pre>
+
+<p>On the monitoring computer, to pipe the data into the wireshark program for analysis, the command becomes this.</p>
+<pre>&gt; netcat -l -p 61000 | wireshark -k -i - &amp;</pre>
+
+<p>The only real gotcha is that you have a TCP connection between OpenWRT and your monitoring computer, so the endpoint has to be <u>listening first</u>, and then after that you can run the command to mirror the WAN data. This ordering might not be important if we sent the Netcat data using UDP, since it is connectionless, but we used TCP so the order is important (literally Netcat will stop running without a TCP endpoint to connect to). So the correct order to run these is as follows:
+	<ul style="list-style-type: none;">
+		<li><u>Run on monitoring computer first</u>: netcat -l -p 61000 | wireshark -k -i - &amp;</li>
+		<li><u>Run on OpenWRT router second</u>: tcpdump -s 0 -U -n -w - -i eth0 not port 22 | netcat 192.168.1.204 61000</li>
+	</ul>
+</p>
+<p>Of course this example assumes you have both netcat and wireshark available on the monitoring computer, which would be the case for Kali Linux in a default setup. This approach works great, but it's a little clunky when you're pressed for time. Also be aware that Netcat does not provide any encryption security, in case that's an issue. Next I'll show an approach using a single-line command from the monitoring computer.</p>
+
+<h3>SSH, the Secure Shell</h3>
+<p>This approach uses the SSH utility to connect between the monitoring computer and OpenWRT router, and it has some advantages over the TcpDump/Netcat approach, but it does require a slight bit of setup. All the activity in this section takes place in the monitoring computer. Also assume that my gateway, the OpenWRT router, has IP address 192.168.1.1 when viewed from any device on my LAN. You should initially connect to OpenWRT using SSH to establish the RSA fingerprint. SSH will ask you for your OpenWRT password and whether you trust the connection.</p>
+<pre>&gt; ssh root@192.168.1.1</pre>
+
+<p>SSH offers extreme security by the use of public-private encryption key-files, but this is slight overkill when you're on a home LAN. SSH by default does not allow you to use a password as a command-line parameter, but there is another utility named sshpass which does.</p>
+<pre>&gt; apt-get install sshpass</pre>
+
+<p>Now to log into OpenWRT you would issue a command like this.</p>
+<pre>&gt; sshpass -p your_password ssh root@192.168.1.1</pre>
+
+<p>That however is a bad idea, because your plaintext password will show up not only in your bash history but also appears to anyone else on the computer who runs the ps command. The way to hide your password is to first copy your password to a file in a secure location (such as your profile directory). Here is the sequence of commands, including the new improved OpenWRT login command.</p>
+<pre>&gt; echo your_password &gt; ~/.openwrtpass &amp; history -r
+&gt; sshpass -f ~/.openwrtpass ssh root@192.168.1.1</pre>
+
+<p>SSH is a very old and well known service which runs (by default) on port 22. OpenWRT has a particular SSH implementation called DropBear, which runs by default when you flash your router, and which only listens for connections from the LAN side, so DropBear is what we're connecting to when we run these SSH commands from our monitoring computer. SSH also has some very convenient functionality in that you can run any command you want on the remote host once the shell is established. Here is an example.</p>
+<pre>&gt; sshpass -f ~/.openwrtpass ssh root@192.168.1.1 "tcpdump -s 0 -U -n -w - -i eth0"</pre>
+
+<p>When the above command is run from the monitoring computer, the tcpdump sub-command is executed on OpenWRT once the shell is established. If you ran the above command from the monitoring computer you would see the raw WAN packets output to your terminal (until you typed ctrl-c). Finally, you can pipe those raw WAN packets into wireshark for real-time analysis.</p>
+<pre>&gt; sshpass -f ~/.openwrtpass ssh root@192.168.1.1 "tcpdump -s 0 -U -n -w - -i eth0" | wireshark -k -i - &amp;</pre>
+
+<p>This is the kind of one-line functionality that could easily be added as a shell alias, or put into a .desktop shortcut file, or any other kind of shell launch utility you might be using. This also has the advantage of being a fully encrypted connection between the monitor and OpenWRT. For some good video instruction on using SSH here are several Hak5 sessions which I bookmarked. The first two cover much of the basic-intermediate stuff, and the last two are a little more advanced.
+	<ul style="list-style-type: none;">
+		<li><a href="https://www.youtube.com/watch?v=g_Row8zEJZc#t=01m50s" target="_blank">SSH Forwarding: Local vs Remote with examples</a></li>
+		<li><a href="https://www.youtube.com/watch?v=nqedV1EdO8Q#t=00m12s" target="_blank">Maintaining Persistent SSH tunnels in Linux</a></li>
+		<li><a href="https://www.youtube.com/watch?v=J798iStWLOM#t=04m55s" target="_blank">Explaining NAT Traversal with SSH proxies</a></li>
+		<li><a href="https://www.youtube.com/watch?v=i8rpxtNL24w#t=00m14s" target="_blank">Setting up persistent reverse shells through relay proxies</a></li>
+	</ul>
+</p>
+
+<div>&nbsp;</div>
+<p>-R. Foreman</p>
+<div>&nbsp;</div>
+
+
+
+	<div id="disqus_thread"></div>
+	<script>
+	    /**
+	     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+	     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+	     */
+	    /*
+	    var disqus_config = function () {
+	        this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+	        this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+	    };
+	    */
+	    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+	        var d = document, s = d.createElement('script');
+	        
+	        s.src = '//4draft.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+	        
+	        s.setAttribute('data-timestamp', +new Date());
+	        (d.head || d.body).appendChild(s);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+
+</div>
+
+<script src="/js/jquery-3.1.1.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/script.js"></script>
+
+<!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-91676417-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+
+</body>
+
+</html>
+
+

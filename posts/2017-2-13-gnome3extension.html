@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Communicating to the audience.">
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/pygments.css">
+	<link rel="stylesheet" href="/css/styles.css">
+	<title>Create Shell Launch Menus in the Gnome3 Desktop</title>
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+<header class="bgimage">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-6">
+				<a href="https://foremandrafts.github.io/"><h1>Drafting my Thoughts</h1></a>
+			</div>
+			<div class="col-xs-6">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="https://www.github.com/foremandrafts">Github</a></li>
+					<li><a href="https://foremandrafts.github.io/archives.html">Archives</a></li>
+					<li><a href="https://foremandrafts.github.io/about.html">About</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-1">
+			</div>
+			<div class="col-xs-8">
+				<h4>Future is looking bright.. <span class="glyphicon glyphicon-sunglasses"></span></h4>
+			</div>
+		</div>
+	</div>
+</header>
+</nav>
+
+<div class="content container-fluid">
+
+    <h2>Shell Launch Menus in Gnome3</h2>
+<h5>February 13, 2017</h5>
+<p class="lead">Linux shares some of the same failings as MSWindows, in that it can be difficult to create menus, buttons, and icons for launching programs. Desktop icons in Linux are accomplished by creating a specific file, with a specific extension, containing specific lines of text, and placing it in a specific folder. Icons aren't too difficult. The Gnome Shell uses something called a desktop topbar (similar to the Macintosh), where the accepted approach to customization is via a so-called Shell Extension, and this very nearly requires a Computer Science degree to create one. I will outline my experiences in learning these techniques, and provide a template for creating a shell extension in Gnome3.</p>
+
+<hr />
+
+<p><a name="DebuggingGnome3Extensions"></a></p>
+<h3>Debugging Gnome3 Extensions</h3>
+<p>Gnome provides some basic debugging capability through a program called <b>lookingglass</b>. One very useful tool I found to assist in debugging is an extension which opens <b>lookingglass</b> from the topbar, and it also restarts the gnome shell by right-clicking the button. These are two tasks that must be performed over and over as you are building a gnome extension. <a href="https://extensions.gnome.org/extension/682/lgloader/" target="_blank">The utility extension I described here is called LGLoader.</a> When running, the <b>LGLoader</b> button sits in the middle of the topbar, and displays as yellow text.</p>
+
+<p><img src="/images/GnomeShellExtImg1.jpg" alt="LGLoader in the TopBar" /></p>
+<p>&nbsp;</p>
+
+<p>To install this, create a folder here.</p>
+<pre>/root/.local/share/gnome-shell/extensions/lgLoader@zhw2101024</pre>
+
+<p>Download all the extension files, and place them into that folder. Open the file <u>metadata.json</u> and add your shell's version number (you can find this by typing <b>gnome-shell --version</b> at a command terminal).</p>
+
+<p><img src="/images/GnomeShellExtImg2.jpg" alt="Finding Shell Version Number at the Command-Line" />
+<img src="/images/GnomeShellExtImg3.jpg" alt="Adding Shell Version Number in Metadata.Json" /></p>
+<p>&nbsp;</p>
+
+<p>Close and save <u>metadata.json</u> , and then restart the gnome shell. The manual way to restart the gnome shell (when you don't have <b>LGLoader</b> available to you) is to type alt-F2 , type the 'r' key, and then hit enter. Once <b>LGLoader</b> is running, you can restart the gnome shell any time by just right-clicking on the button.</p>
+
+<p>The final piece to the puzzle is to enable the extension. This can be done with something called the <u>dconf editor</u> (sort of like the registry editor in MSWindows). A far easier way to enable the extension is to install a program called <b>gnome-tweak-tool</b>.</p>
+<pre>&gt; apt-get install gnome-tweak-tool</pre>
+
+<p>Launch the <b>gnome-tweak-tool</b> from a command line by uttering its name. Navigate to the Extensions tab, and use the button-sliders to enable or disable individual extensions.</p>
+
+<p><img src="/images/GnomeShellExtImg4.jpg" alt="Gnome Tweak Tool, Enable Shell Extensions" /></p>
+<p>&nbsp;</p>
+
+<p>I found that a small correction to the original code for <b>LGLoader</b> was necessary to make it work properly. To correct the problem code, do the following. Open the file <u>extension.js</u> and find the section of code which appears as follows.</p>
+<pre>
+<span class="c">//let statusArea = Main.panel.statusArea; </span>
+<span class="k">for</span>(name <span class="k">in</span> statusArea) { 
+  statusEvents[name] <span class="o">=</span> statusArea[name].menu.connect(<span class="s">&#39;open-state-changed&#39;</span>, <span class="k">function</span>(menu, isOpen) { 
+    statusArea.lgLoader.actor.can_focus <span class="o">=</span> <span class="o">!</span>isOpen; 
+  }); 
+}
+</pre>
+
+<p>Replace the above code with the block appearing below.</p>
+<pre>
+<span class="c">//let statusArea = Main.panel.statusArea; </span>
+<span class="k">for</span>(name <span class="k">in</span> statusArea) {
+  <span class="k">try</span>  {
+    statusEvents[name] <span class="o">=</span> statusArea[name].menu.connect(<span class="s">&#39;open-state-changed&#39;</span>, <span class="k">function</span>(menu, isOpen) {
+      statusArea.lgLoader.actor.can_focus <span class="o">=</span> <span class="o">!</span>isOpen;
+    });
+  }
+  <span class="k">catch</span>(TypeError) {
+  }
+}
+</pre>
+
+<p>Finally, restart the gnome shell, and the errant behavior will be corrected. I have made this fix and collected the <b>LGLoader</b> files into a single downloadable zip file, <a href="/images/lgLoader@zhw2101024.zip" target="_blank">which you can find here</a>. <b>LGLoader</b> is a highly useful utility for working with Gnome3 extensions, and is well worth the time taken to set it up.</p>
+
+<hr />
+
+<p><a name="BuildingAGnome3Extension"></a></p>
+<h3>Building a Gnome3 Extension</h3>
+<p>If you begin researching Gnome Shell extensions, you'll find a good deal of information. The documentation I found was spread over such a lengthy timeframe that it not only includes Gnome2 Panel applets (an older technology, from a prior version of Gnome), but it also displays classes and techniques which are either deprecated or have been removed altogether from the shell libraries. In short, the web documentation and help articles are kind of a mess. Rather than go into detail about things I've encountered, I will simply demonstrate the process for creating an extension, and then provide a working code-template for creating a topbar drop-down menu, and how to respond to menu-item clicks. Finally I'll talk briefly about the Gnome Shell libraries, and how to find documentation for the various objects and function calls.</p>
+
+<p>The latest and greatest version of Gnome, the Gnome3 Shell, has a <u>web-centric model</u>. That is to say, it relies more heavily on new web-based technologies (such as <u>javascript</u>) than prior versions. As such, the paradigm used to create shell extensions is to build them using <u>javascript</u>. I suppose it's still possible to build a shell extension using an object-code language like C++, but I'm not personally aware of anyone who is doing it that way. The folks behind Gnome Shell have created a small program to build starter extensions, which is invoked like this.</p>
+<pre>&gt; gnome-shell-extension-tool --create-extension</pre>
+
+<p>You will be prompted for some basic information, such as a <u>name</u>, <u>description</u>, and <u>email address</u>. Then the skeleton is created for you under this folder.</p>
+<pre>/root/.local/share/gnome-shell/extensions/yourextensionname</pre>
+
+<p><img src="/images/GnomeShellExtImg5.jpg" alt="Running gnome-shell-extension-tool to Create a New Extension" /></p>
+<p>&nbsp;</p>
+
+<p>The create script will then open the file <u>extension.js</u> for you, so you may begin editing.</p>
+
+<p>You can see quite a lot of example code over at <a href="https://extensions.gnome.org" target="_blank">https://extensions.gnome.org</a> (here is <a href="https://extensions.gnome.org/review/4892" target="_blank">one particular example project</a>) , and you'll notice there are just slight differences in how they are set up, structurally. What has happened is that the javascript language has changed over time, and more code constructs have been added to the gnome libraries, allowing more advanced, higher-level functionality. Also, the Gnome Shell extension API has changed over time, so the interface calling convention is different depending on how old the extension is that you're looking at.</p>
+
+<p>Here is the code template I arrived at, which I believe represents the most current standard for the Gnome3 extension.</p>
+
+<pre><span class="k">const</span> Main <span class="o">=</span> imports.ui.main;
+<span class="k">const</span> Lang <span class="o">=</span> imports.lang;
+<span class="k">const</span> PanelMenu <span class="o">=</span> imports.ui.panelMenu;
+<span class="k">const</span> PopupMenu <span class="o">=</span> imports.ui.popupMenu;
+<span class="k">const</span> St <span class="o">=</span> imports.gi.St;
+<span class="k">const</span> Gio <span class="o">=</span> imports.gi.Gio;
+<span class="c">//const Gtk = imports.gi.Gtk;</span>
+<span class="k">const</span> GLib <span class="o">=</span> imports.gi.GLib;
+<span class="k">const</span> Clutter <span class="o">=</span> imports.gi.Clutter;
+<span class="k">const</span> Shell <span class="o">=</span> imports.gi.Shell;
+<span class="k">const</span> Util <span class="o">=</span> imports.misc.util;
+
+<span class="k">const</span> MyPanelObject<span class="o">=</span> <span class="k">new</span> Lang.Class({
+  Name<span class="o">:</span> <span class="s">&#39;MyPanelObject&#39;</span>,
+  Extends<span class="o">:</span> PanelMenu.Button,
+
+  _init<span class="o">:</span> <span class="k">function</span>() {
+    <span class="c">//Call the super-class</span>
+    <span class="k">this</span>.parent(St.Align.START);
+
+    <span class="c">//Add the label actor</span>
+    <span class="k">this</span>.buttonText <span class="o">=</span> <span class="k">new</span> St.Label({ text<span class="o">:</span> <span class="s">&quot;MyShellExt&quot;</span> });
+    <span class="k">this</span>.actor.add_actor(<span class="k">this</span>.buttonText);
+
+    <span class="c">//Add first menu item, with action</span>
+    <span class="k">this</span>.menu.addAction(<span class="s">&quot;First Menu Item&quot;</span>, <span class="k">function</span>(event) {
+      Main.Util.trySpawnCommandLine(<span class="s">&#39;xdg-open https://extensions.gnome.org/&#39;</span>);
+    });
+
+    <span class="c">//Add second menu item, with no action</span>
+    <span class="k">this</span>.menu.addMenuItem(<span class="k">new</span> PopupMenu.PopupMenuItem(<span class="s">&quot;Second Menu Item&quot;</span>));
+
+    <span class="c">//Add a separator</span>
+    <span class="k">this</span>.menu.addMenuItem(<span class="k">new</span> PopupMenu.PopupSeparatorMenuItem());
+
+    <span class="c">//Add a submenu as the 3rd item, and submenu item with no action</span>
+    <span class="k">this</span>.MySubMenu <span class="o">=</span> <span class="k">new</span> PopupMenu.PopupSubMenuMenuItem(<span class="s">&quot;SubMenu&quot;</span>);
+    <span class="k">this</span>.menu.addMenuItem(<span class="k">this</span>.MySubMenu);
+    <span class="k">this</span>.MySubMenu.menu.addMenuItem(<span class="k">new</span> PopupMenu.PopupMenuItem(<span class="s">&quot;submenu value&quot;</span>));
+
+    <span class="c">//Add fourth menu item, with action</span>
+    <span class="k">this</span>.menu.addAction(<span class="s">&quot;Gnome Tweak Tool&quot;</span>, <span class="k">function</span>(event) {
+      <span class="k">let</span> bashStr <span class="o">=</span> <span class="s">&quot;bash -c &#39;gnome-tweak-tool;bash&#39;&quot;</span>;
+      Util.spawn([<span class="s">&#39;gnome-terminal&#39;</span>, <span class="s">&#39;--tab&#39;</span>, <span class="s">&#39;--geometry=168x48+74+0&#39;</span>, <span class="s">&#39;--title=MyPC&#39;</span>, <span class="s">&#39;-e&#39;</span>, bashStr, <span class="s">&#39;--working-directory=/bin&#39;</span>]);
+    });
+
+    <span class="c">//Add fifth menu item, with action. This works with external function _TermLaunch, but only if you call menuItem.connect separately.</span>
+    <span class="k">let</span> menuItem <span class="o">=</span> <span class="k">new</span> PopupMenu.PopupMenuItem(<span class="s">&quot;Fifth Menu Item&quot;</span>);
+    <span class="k">let</span> myruncmd <span class="o">=</span> <span class="s">&quot;cd /bin; ls -la&quot;</span>;
+    menuItem.connect(<span class="s">&#39;activate&#39;</span>, Lang.bind(<span class="k">this</span>, <span class="k">this</span>._TermLaunch, myruncmd));
+    <span class="k">this</span>.menu.addMenuItem(menuItem);
+  },
+
+  _TermLaunch<span class="o">:</span> <span class="k">function</span>(actor, event, runcmd) {
+    <span class="c">//Util.spawn([&#39;gnome-terminal&#39;, &#39;--tab&#39;, &#39;--geometry=168x48+74+0&#39;, &#39;--title=MyPC&#39;, &#39;-e&#39;, &quot;bash -c &#39;ls -la;bash&#39;&quot;, &#39;--working-directory=/bin&#39;]);</span>
+    Util.spawn([<span class="s">&#39;gnome-terminal&#39;</span>, <span class="s">&#39;--tab&#39;</span>, <span class="s">&#39;--geometry=168x48+74+0&#39;</span>, <span class="s">&#39;--title=MyPC&#39;</span>, <span class="s">&#39;-e&#39;</span>, <span class="s">&quot;bash -c &#39;&quot;</span>  <span class="o">+</span> runcmd <span class="o">+</span> <span class="s">&quot;;bash&#39;&quot;</span>, <span class="s">&#39;--working-directory=/bin&#39;</span>]);
+  }
+
+});
+
+<span class="k">function</span> init()  {
+}
+
+<span class="k">let</span> MyObject;
+
+<span class="k">function</span> enable()  {
+  MyObject <span class="o">=</span> <span class="k">new</span> MyPanelObject();
+  Main.panel.addToStatusArea(<span class="s">&#39;SamplePanelButton&#39;</span>, MyObject);
+}
+
+<span class="k">function</span> disable()  {
+  <span class="k">if</span> (MyObject) {
+    MyObject.destroy();
+    MyObject <span class="o">=</span> <span class="k">null</span>;
+  }
+}
+</pre>
+
+<p><u>init()</u> is called once when the extension is added to the shell. <u>enable()</u> / <u>disable()</u> are called each time the extension is activated or deactivated by the user (for example, in the <b>gnome-tweak-tool</b>). The above example code shows 3 differents ways to launch terminals and run programs. It's a pretty straightforward file once you stop looking at the older variations. This is simple javascript, and about the most difficult task is finding decent documentation for the various objects and functions.</p>
+
+<p>You can browse through source code for some of the installed Gnome3 components. For example, the application menu on the topbar is simply an extension located here.</p>
+<pre>/usr/share/gnome-shell/extensions/apps-menu@gnome-shell-extensions.gcampax.github.com</pre>
+
+<hr />
+
+<p><a name="DocumentationForGnome3Extensions"></a></p>
+<h4><u>Documentation for Gnome3 Extensions</u></h4>
+<p>With regard to finding documentation for the various classes, global variables, and functions, this is where things get more bizarre and difficult. Part of the Gnome libraries exist as javascript, and part of them are compiled (C or C++) object code. Wherever you see the acronym <u>GJS</u>, you should imagine that code existing as javascript. When you see the term <u>GIR</u> you should imagine XML files which reference C-language functions that are callable from javascript.</p>
+
+<p>You'll find a lot of information at the <a href="https://developer.gnome.org/guides" target="_blank">Gnome developer wiki</a>. However much of it doesn't apply to shell extensions, and when you do finally drill down to function and class references which are used by extensions, you'll find they use C-language representation, and often the names are slightly different than what you use in practice. Some of the best information can be gotten from the source code itself. Prior to Gnome 3.12 all the javascript source files were installed on the system as individual files, but after that version these files were wrapped up into a shared library (two or more in fact). Here are two shared libraries that I am aware of which contain this javascript source code.</p>
+<pre>/usr/lib/gnome-shell/libgnome-shell.so
+/usr/lib/libgjs.so.0</pre>
+
+<p>If you wish to extract the source files, I have written a <u>BASH script</u> to do that. Open a terminal and execute this script.</p>
+<pre><span class="nn">#!/bin/sh</span>
+
+<span class="vi">gs</span><span class="o">=</span>/usr/lib/gnome-shell/libgnome-shell.so
+
+<span class="nb">mkdir</span> <span class="vi">$HOME</span>/Downloads/gnome-shell-js
+<span class="nb">cd</span> <span class="vi">$HOME</span>/Downloads/gnome-shell-js
+
+<span class="nb">mkdir</span> -p ui/components ui/status misc perf portalHelper extensionPrefs gdm
+
+<span class="k">for </span>r in `gresource list <span class="vi">$gs</span>`; <span class="k">do</span>
+<span class="k">  </span><span class="nb">gresource</span> extract <span class="vi">$gs</span> <span class="vi">$r</span> &gt; <span class="k">${</span><span class="vi">r</span>#/org/gnome/shell/<span class="k">}</span>
+<span class="k">done</span>
+
+<span class="vi">gjs</span><span class="o">=</span>/usr/lib/libgjs.so.0
+<span class="nb">mkdir</span> -p modules/overrides modules/tweener
+
+<span class="k">for </span>r in `gresource list <span class="vi">$gjs</span>`; <span class="k">do</span>
+<span class="k">  </span><span class="nb">gresource</span> extract <span class="vi">$gjs</span> <span class="vi">$r</span> &gt; <span class="k">${</span><span class="vi">r</span>#/org/gnome/gjs/<span class="k">}</span>
+<span class="k">done</span>
+</pre>
+
+<p>The resulting collection of javascript files will get you maybe 80% of the references you will need to do most common kinds of programming, but it's really difficult for me to say for sure. Much of <u>GLib</u>, <u>GIO</u>, and <u>GObject</u> is still C-language source code. <a href="https://people.gnome.org/~gcampagna/docs/" target="_blank">Here is another reference</a> put together a couple years ago, which provides a (nearly complete) set of API references. I'm sure I'll provide more example code over time, but this is enough to put up a topbar menu for launching programs.</p>
+
+<p><img src="/images/GnomeShellExtImg6.jpg" alt="Final TopBar Menu Being Displayed" /></p>
+<p>&nbsp;</p>
+
+<div>&nbsp;</div>
+<p>-R. Foreman</p>
+<div>&nbsp;</div>
+
+
+	<div id="disqus_thread"></div>
+	<script>
+	    /**
+	     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+	     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+	     */
+	    /*
+	    var disqus_config = function () {
+	        this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+	        this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+	    };
+	    */
+	    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+	        var d = document, s = d.createElement('script');
+	        
+	        s.src = '//4draft.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+	        
+	        s.setAttribute('data-timestamp', +new Date());
+	        (d.head || d.body).appendChild(s);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+	<div>&nbsp;</div>
+
+</div>
+
+<script src="/js/jquery-3.1.1.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/script.js"></script>
+
+<!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-91676417-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+
+</body>
+
+</html>
+
+
